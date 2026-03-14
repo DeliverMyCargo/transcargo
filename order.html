@@ -1,188 +1,129 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-
 <meta charset="UTF-8">
-<title>Расчет доставки</title>
-
-<script src="https://api-maps.yandex.ru/2.1/?apikey=21a0a372-2599-476c-a069-77850517dfdb&lang=ru_RU"></script>
-
+<title>Оформление заказа</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
-
-body{
-margin:0;
-font-family:Arial;
-background:#1f1f1f;
-color:white;
-}
-
-.container{
-width:1200px;
-margin:auto;
-padding:40px;
-}
-
-#map{
-width:100%;
-height:400px;
-border-radius:10px;
-}
-
-.calc{
-margin-top:20px;
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-}
-
-input,select{
-padding:10px;
-border-radius:6px;
-border:none;
-}
-
-button{
-background:#00aaff;
-border:none;
-padding:12px;
-border-radius:6px;
-font-weight:bold;
-cursor:pointer;
-}
-
-.result{
-margin-top:20px;
-font-size:20px;
-color:#00ff9c;
-}
-
+body{margin:0;font-family:Arial;background:#1f1f1f;color:white;}
+.container{width:1200px;margin:auto;padding:20px;}
+#map{height:400px;width:100%;border-radius:10px;margin-bottom:20px;}
+input,select{padding:10px;border-radius:6px;border:none;width:100%;margin-bottom:10px;}
+button{background:#00aaff;border:none;padding:12px;border-radius:6px;font-weight:bold;cursor:pointer;}
+button:hover{background:#0088cc;}
+.hidden{display:none;}
+.result{margin-top:20px;color:#00ff9c;font-size:18px;font-weight:bold;}
 </style>
-
 </head>
-
 <body>
 
 <div class="container">
-
-<h2>Расчет доставки</h2>
-
+<h2>Оформление заказа</h2>
 <div id="map"></div>
 
-<div class="calc">
-
-<select id="type">
-
+<label>Тип груза</label>
+<select id="cargoType">
+<option value="">Выберите</option>
 <option value="letter">Письмо</option>
-<option value="parcel">Посылка</option>
-<option value="cargo">Сборный груз</option>
+<option value="box">Посылка</option>
+<option value="group">Сборный груз</option>
 <option value="truck">Выделенный транспорт</option>
-
 </select>
 
-<input id="weight" placeholder="Вес (кг)">
-
-<input id="length" placeholder="Длина (см)">
-<input id="width" placeholder="Ширина (см)">
-<input id="height" placeholder="Высота (см)">
-
-<input id="priceCargo" placeholder="Ценность посылки">
-
-<label><input type="checkbox" id="insurance"> Страховка</label>
-<label><input type="checkbox" id="safe"> Надежная сделка</label>
-<label><input type="checkbox" id="sms"> SMS уведомления</label>
-
-<button onclick="calculate()">Рассчитать</button>
-
+<div id="letter" class="hidden">
+<label>Количество листов</label><input type="number" id="letterCount" value="1">
 </div>
+
+<div id="box" class="hidden">
+<label>Размер коробки</label>
+<select id="boxSize">
+<option>S (30×20×10)</option>
+<option>M (40×30×20)</option>
+<option>L (60×40×40)</option>
+<option>XL (80×60×60)</option>
+</select>
+</div>
+
+<div id="group" class="hidden">
+<label>Длина (см)</label><input type="number" id="gLength">
+<label>Ширина (см)</label><input type="number" id="gWidth">
+<label>Высота (см)</label><input type="number" id="gHeight">
+<label>Вес (кг)</label><input type="number" id="gWeight">
+</div>
+
+<div id="truck" class="hidden">
+<label>Тип транспорта</label>
+<select id="truckType">
+<option>Largus (2 м³)</option>
+<option>Газель (10 м³)</option>
+<option>Фура (82 м³)</option>
+</select>
+</div>
+
+<label>Имя отправителя</label><input type="text" id="senderName">
+<label>Email отправителя</label><input type="email" id="senderEmail">
+<label>Откуда</label><input type="text" id="from">
+<label>Куда</label><input type="text" id="to">
+
+<label><input type="checkbox" id="insurance"> Страховка (10%)</label>
+<label><input type="checkbox" id="safe"> Надежная сделка (3%)</label>
+<label><input type="checkbox" id="sms"> SMS уведомления (+20₽)</label>
+
+<button onclick="calculate()">Рассчитать стоимость</button>
 
 <div class="result" id="result"></div>
 
 </div>
 
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
+var map = L.map('map').setView([55.75,37.61],5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+var markerFrom, markerTo;
 
-ymaps.ready(init)
+map.on('click',function(e){
+  if(!markerFrom){
+    markerFrom=L.marker(e.latlng).addTo(map);
+    document.getElementById("from").value=e.latlng.lat+","+e.latlng.lng;
+  }else{
+    markerTo=L.marker(e.latlng).addTo(map);
+    document.getElementById("to").value=e.latlng.lat+","+e.latlng.lng;
+  }
+});
 
-let map
-
-function init(){
-
-map=new ymaps.Map("map",{
-
-center:[55.75,37.61],
-zoom:5
-
-})
-
-}
+document.getElementById("cargoType").addEventListener("change",function(){
+  document.querySelectorAll(".hidden").forEach(el=>el.style.display="none")
+  if(this.value=="letter") document.getElementById("letter").style.display="block";
+  if(this.value=="box") document.getElementById("box").style.display="block";
+  if(this.value=="group") document.getElementById("group").style.display="block";
+  if(this.value=="truck") document.getElementById("truck").style.display="block";
+});
 
 function calculate(){
+  let price=0;
+  let type=document.getElementById("cargoType").value;
+  if(type=="letter"){ price=150; }
+  if(type=="box"){ price=300; }
+  if(type=="group"){ price=800; }
+  if(type=="truck"){ 
+    let truckType=document.getElementById("truckType").value;
+    if(truckType.includes("Largus")) price=3000;
+    if(truckType.includes("Газель")) price=5000;
+    if(truckType.includes("Фура")) price=10000;
+  }
+  // Доп услуги
+  let cargoValue=parseFloat(document.getElementById("gWeight")?.value||0);
+  if(document.getElementById("insurance").checked) price+=cargoValue*0.1;
+  if(document.getElementById("safe").checked) price+=cargoValue*0.03;
+  if(document.getElementById("sms").checked) price+=20;
 
-let type=document.getElementById("type").value
-let weight=parseFloat(document.getElementById("weight").value)||1
-let length=parseFloat(document.getElementById("length").value)||10
-let width=parseFloat(document.getElementById("width").value)||10
-let height=parseFloat(document.getElementById("height").value)||10
-
-let volumeWeight=(length*width*height)/5000
-
-let realWeight=Math.max(weight,volumeWeight)
-
-let price=0
-
-if(type=="letter"){
-
-price=150+5*50
-
+  document.getElementById("result").innerText="Стоимость: "+price.toFixed(0)+" ₽";
 }
-
-if(type=="parcel"){
-
-price=300+8*50+(realWeight*20)
-
-}
-
-if(type=="cargo"){
-
-price=800+12*50+(realWeight*5)
-
-}
-
-if(type=="truck"){
-
-price=3000+50*50
-
-}
-
-let cargoValue=parseFloat(document.getElementById("priceCargo").value)||0
-
-if(document.getElementById("insurance").checked){
-
-price+=cargoValue*0.1
-
-}
-
-if(document.getElementById("safe").checked){
-
-price+=cargoValue*0.03
-
-}
-
-if(document.getElementById("sms").checked){
-
-price+=20
-
-}
-
-document.getElementById("result").innerHTML="Стоимость доставки: "+price.toFixed(0)+" ₽"
-
-}
-
 </script>
 
-<!--Start of Tawk.to Script-->
+<!-- Tawk.to -->
 <script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
 (function(){
 var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
 s1.async=true;
