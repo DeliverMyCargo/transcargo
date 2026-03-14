@@ -1,169 +1,152 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-
 <meta charset="UTF-8">
-<title>DeliverMyCargo</title>
+<title>TransCargo</title>
 
-<script src="https://api-maps.yandex.ru/2.1/?apikey=21a0a372-2599-476c-a069-77850517dfdb&lang=ru_RU"></script>
+<!-- Leaflet для карты -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
-
 body{
-margin:0;
-font-family:Arial;
-background:#1f1f1f;
-color:white;
+  margin:0;
+  font-family: Arial;
+  background:#1f1f1f;
+  color:white;
 }
-
 header{
-background:#111;
-padding:15px 40px;
-display:flex;
-justify-content:space-between;
-align-items:center;
+  background:#111;
+  padding:15px 40px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-
 header h1{
-color:#00aaff;
+  color:#00aaff;
 }
-
 nav a{
-color:white;
-margin-left:20px;
-text-decoration:none;
+  color:white;
+  margin-left:20px;
+  text-decoration:none;
 }
-
 .container{
-width:1200px;
-margin:auto;
+  width:1200px;
+  margin:auto;
+  padding:20px;
 }
-
 .hero{
-padding:40px 0;
+  padding:40px 0;
+  position:relative;
 }
-
 #map{
-width:100%;
-height:450px;
-border-radius:10px;
+  width:100%;
+  height:450px;
+  border-radius:10px;
+  margin-bottom:20px;
 }
-
 .form{
-margin-top:20px;
-display:flex;
-gap:10px;
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
 }
-
 input{
-padding:12px;
-border-radius:6px;
-border:none;
-flex:1;
+  padding:12px;
+  border-radius:6px;
+  border:none;
+  flex:1;
 }
-
 button{
-background:#00aaff;
-border:none;
-padding:12px;
-border-radius:6px;
-font-weight:bold;
-cursor:pointer;
+  background:#00aaff;
+  border:none;
+  padding:12px;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
 }
-
 button:hover{
-background:#0088cc;
-color:white;
+  background:#0088cc;
 }
-
 .telegram{
-position:fixed;
-left:20px;
-bottom:20px;
-width:60px;
+  position:fixed;
+  left:20px;
+  bottom:20px;
+  width:60px;
+  z-index:1000;
 }
-
 .telegram img{
-width:60px;
+  width:60px;
 }
-
+/* Анимация фуры */
+.truck{
+  position:absolute;
+  bottom:10px;
+  left:-150px;
+  width:150px;
+  animation: drive 10s linear infinite;
+}
+@keyframes drive{
+  0% {left:-150px;}
+  100% {left:1250px;}
+}
 </style>
 
 </head>
-
 <body>
 
 <header>
-
-<h1>DeliverMyCargo</h1>
-
+<h1>TransCargo</h1>
 <nav>
-
 <a href="#">Главная</a>
 <a href="order.html">Заказать</a>
-
 </nav>
-
 </header>
 
 <div class="container">
-
-<div class="hero">
-
-<h2>Доставка грузов по России</h2>
-
-<div id="map"></div>
-
-<div class="form">
-
-<input id="from" placeholder="Откуда">
-
-<input id="to" placeholder="Куда">
-
-<button onclick="goOrder()">Рассчитать и заказать</button>
-
-</div>
-
-</div>
-
+  <div class="hero">
+    <h2>Доставка грузов по России</h2>
+    <img src="https://cdn-icons-png.flaticon.com/512/2799/2799274.png" class="truck" alt="truck">
+    <div id="map"></div>
+    <div class="form">
+      <input id="from" placeholder="Откуда">
+      <input id="to" placeholder="Куда">
+      <button onclick="goOrder()">Рассчитать и заказать</button>
+    </div>
+  </div>
 </div>
 
 <a class="telegram" href="https://t.me/YOUR_BOT" target="_blank">
-
-<img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png">
-
+  <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png">
 </a>
 
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
+var map = L.map('map').setView([55.75,37.61],5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxZoom:19
+}).addTo(map);
 
-function goOrder(){
+var markerFrom, markerTo;
 
-let from=document.getElementById("from").value
-let to=document.getElementById("to").value
-
-localStorage.setItem("from",from)
-localStorage.setItem("to",to)
-
-window.location="order.html"
-
-}
-
-ymaps.ready(init)
-
-function init(){
-
-let map=new ymaps.Map("map",{
-
-center:[55.75,37.61],
-zoom:5
-
+map.on('click',function(e){
+  if(!markerFrom){
+    markerFrom = L.marker(e.latlng).addTo(map)
+    document.getElementById("from").value = e.latlng.lat+","+e.latlng.lng
+  }else{
+    markerTo = L.marker(e.latlng).addTo(map)
+    document.getElementById("to").value = e.latlng.lat+","+e.latlng.lng
+  }
 })
 
+function goOrder(){
+  let from=document.getElementById("from").value
+  let to=document.getElementById("to").value
+  localStorage.setItem("from",from)
+  localStorage.setItem("to",to)
+  window.location="order.html"
 }
-
 </script>
 
-<!--Start of Tawk.to Script-->
+<!-- Tawk.to -->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
 (function(){
