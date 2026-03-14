@@ -2,21 +2,21 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Оформление заказа</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<title>Оформление заказа - TransCargo</title>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=21a0a372-2599-476c-a069-77850517dfdb&lang=ru_RU"></script>
 <style>
-body{margin:0;font-family:Arial;background:#1f1f1f;color:white;}
-.container{width:1200px;margin:auto;padding:20px;}
-#map{height:400px;width:100%;border-radius:10px;margin-bottom:20px;}
-input,select{padding:10px;border-radius:6px;border:none;width:100%;margin-bottom:10px;}
-button{background:#00aaff;border:none;padding:12px;border-radius:6px;font-weight:bold;cursor:pointer;}
-button:hover{background:#0088cc;}
-.hidden{display:none;}
-.result{margin-top:20px;color:#00ff9c;font-size:18px;font-weight:bold;}
+body { margin:0; font-family:Arial; background:#1f1f1f; color:white; }
+.container { width:1200px; margin:auto; padding:20px; }
+#map { width:100%; height:400px; border-radius:10px; margin-bottom:20px; }
+input, select { width:100%; padding:10px; border-radius:6px; border:none; margin-bottom:10px; }
+button { background:#00aaff; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer; }
+button:hover { background:#0088cc; }
+.hidden { display:none; }
+.result { margin-top:20px; color:#00ff9c; font-size:18px; font-weight:bold; }
+label { display:flex; align-items:center; gap:5px; margin-bottom:5px; }
 </style>
 </head>
 <body>
-
 <div class="container">
 <h2>Оформление заказа</h2>
 <div id="map"></div>
@@ -31,7 +31,8 @@ button:hover{background:#0088cc;}
 </select>
 
 <div id="letter" class="hidden">
-<label>Количество листов</label><input type="number" id="letterCount" value="1">
+<label>Количество листов</label>
+<input type="number" id="letterCount" value="1">
 </div>
 
 <div id="box" class="hidden">
@@ -64,32 +65,54 @@ button:hover{background:#0088cc;}
 <label>Email отправителя</label><input type="email" id="senderEmail">
 <label>Откуда</label><input type="text" id="from">
 <label>Куда</label><input type="text" id="to">
+<label>Стоимость посылки (₽)</label><input type="number" id="priceCargo" value="0">
 
 <label><input type="checkbox" id="insurance"> Страховка (10%)</label>
 <label><input type="checkbox" id="safe"> Надежная сделка (3%)</label>
 <label><input type="checkbox" id="sms"> SMS уведомления (+20₽)</label>
 
 <button onclick="calculate()">Рассчитать стоимость</button>
-
 <div class="result" id="result"></div>
-
 </div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-var map = L.map('map').setView([55.75,37.61],5);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-var markerFrom, markerTo;
+ymaps.ready(init);
+let myMap, placemarkFrom, placemarkTo;
 
-map.on('click',function(e){
-  if(!markerFrom){
-    markerFrom=L.marker(e.latlng).addTo(map);
-    document.getElementById("from").value=e.latlng.lat+","+e.latlng.lng;
-  }else{
-    markerTo=L.marker(e.latlng).addTo(map);
-    document.getElementById("to").value=e.latlng.lat+","+e.latlng.lng;
-  }
-});
+function init(){
+  myMap = new ymaps.Map("map", {center:[55.75,37.61], zoom:5});
+  myMap.events.add('click', function(e){
+      let coords = e.get('coords');
+      if(!placemarkFrom){
+          placemarkFrom = new ymaps.Placemark(coords);
+          myMap.geoObjects.add(placemarkFrom);
+          document.getElementById("from").value = coords.join(',');
+      } else if(!placemarkTo){
+          placemarkTo = new ymaps.Placemark(coords);
+          myMap.geoObjects.add(placemarkTo);
+          document.getElementById("to").value = coords.join(',');
+      }
+  });
+}
+
+function updatePlacemark(id,input){
+  let val = document.getElementById(input).value;
+  ymaps.geocode(val).then(function(res){
+      let coord = res.geoObjects.get(0).geometry.getCoordinates();
+      if(id=='from'){
+          if(placemarkFrom) myMap.geoObjects.remove(placemarkFrom);
+          placemarkFrom = new ymaps.Placemark(coord);
+          myMap.geoObjects.add(placemarkFrom);
+      } else {
+          if(placemarkTo) myMap.geoObjects.remove(placemarkTo);
+          placemarkTo = new ymaps.Placemark(coord);
+          myMap.geoObjects.add(placemarkTo);
+      }
+  });
+}
+
+document.getElementById("from").addEventListener("change",()=>updatePlacemark('from','from'));
+document.getElementById("to").addEventListener("change",()=>updatePlacemark('to','to'));
 
 document.getElementById("cargoType").addEventListener("change",function(){
   document.querySelectorAll(".hidden").forEach(el=>el.style.display="none")
@@ -102,21 +125,19 @@ document.getElementById("cargoType").addEventListener("change",function(){
 function calculate(){
   let price=0;
   let type=document.getElementById("cargoType").value;
-  if(type=="letter"){ price=150; }
-  if(type=="box"){ price=300; }
-  if(type=="group"){ price=800; }
-  if(type=="truck"){ 
+  if(type=="letter") price=150;
+  if(type=="box") price=300;
+  if(type=="group") price=800;
+  if(type=="truck"){
     let truckType=document.getElementById("truckType").value;
     if(truckType.includes("Largus")) price=3000;
     if(truckType.includes("Газель")) price=5000;
     if(truckType.includes("Фура")) price=10000;
   }
-  // Доп услуги
-  let cargoValue=parseFloat(document.getElementById("gWeight")?.value||0);
+  let cargoValue=parseFloat(document.getElementById("priceCargo").value)||0;
   if(document.getElementById("insurance").checked) price+=cargoValue*0.1;
   if(document.getElementById("safe").checked) price+=cargoValue*0.03;
   if(document.getElementById("sms").checked) price+=20;
-
   document.getElementById("result").innerText="Стоимость: "+price.toFixed(0)+" ₽";
 }
 </script>
