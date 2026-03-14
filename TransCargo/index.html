@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ООО "ТрансКарго" - Главная</title>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=21a0a372-2599-476c-a069-77850517dfdb&lang=ru_RU" type="text/javascript"></script>
+<link rel="stylesheet" href="js/main.js">
+<style>
+body{margin:0;padding:0;font-family:Arial,sans-serif;background:#1c1c1c;color:#fff;}
+header{background:#111;padding:15px 30px;display:flex;align-items:center;justify-content:space-between;position:fixed;width:100%;top:0;z-index:1000;}
+header h1{color:#00aaff;margin:0;}
+nav a{color:#fff;margin-left:20px;text-decoration:none;font-weight:bold;}
+nav a:hover{color:#00aaff;}
+.hero{position:relative;height:500px;background:#222;overflow:hidden;margin-top:60px;}
+.hero img.fura{position:absolute;bottom:20px;left:-300px;width:300px;animation:drive 8s linear infinite;}
+@keyframes drive{0%{left:-300px;}100%{left:110%;}}
+.hero-content{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.hero-content h2{color:#00aaff;font-size:40px;margin:0;}
+.hero-content p{font-size:20px;margin:10px 0;}
+.contact-block{position:fixed;top:120px;left:20px;width:280px;background:#222;padding:15px;border-radius:8px;box-shadow:0 0 15px rgba(0,0,0,0.7);}
+.contact-block h3{color:#00aaff;margin:0 0 10px 0;}
+.contact-block input, .contact-block button{width:100%;margin-bottom:10px;padding:10px;border-radius:5px;border:none;}
+.contact-block button{background:#00aaff;color:#000;font-weight:bold;cursor:pointer;}
+.contact-block button:hover{background:#0077cc;color:#fff;}
+.telegram-icon{position:fixed;left:20px;bottom:50px;width:60px;height:60px;background:#00aaff;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:0.3s;z-index:1000;}
+.telegram-icon:hover{transform:scale(1.2);}
+.telegram-icon img{width:35px;}
+</style>
+</head>
+<body>
+<header>
+<h1>ООО "ТрансКарго"</h1>
+<nav>
+<a href="calculator.html">Рассчитать</a>
+<a href="services/send_letter.html">Услуги</a>
+<a href="account.html">Личный кабинет</a>
+</nav>
+</header>
+
+<section class="hero">
+<img src="images/truck.png" alt="Фура" class="fura">
+<div class="hero-content">
+<h2>Грузоперевозки по России и СНГ</h2>
+<p>Рассчитайте доставку или оставьте заявку — мы свяжемся</p>
+</div>
+</section>
+
+<div class="contact-block">
+<h3>Контакты</h3>
+<input type="text" id="cbName" placeholder="Ваше имя">
+<input type="tel" id="cbPhone" placeholder="Телефон">
+<input type="email" id="cbEmail" placeholder="Email">
+<button onclick="sendContact()">Отправить</button>
+</div>
+
+<div class="telegram-icon" onclick="openTelegram()">
+<img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram">
+</div>
+
+<script>
+function sendContact(){
+    let name=document.getElementById('cbName').value;
+    let phone=document.getElementById('cbPhone').value;
+    let email=document.getElementById('cbEmail').value;
+    if(!name||!phone){alert('Введите имя и телефон');return;}
+    console.log('Contact:', name, phone, email);
+    alert('Спасибо! Мы свяжемся.');
+}
+function openTelegram(){window.open('https://t.me/YOUR_BOT_HERE','_blank');}
+</script>
+</body>
+</html>
