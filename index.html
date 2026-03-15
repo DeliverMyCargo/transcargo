@@ -3,91 +3,382 @@
 <head>
 <meta charset="UTF-8">
 <title>TransCargo</title>
+
 <script src="https://api-maps.yandex.ru/2.1/?apikey=21a0a372-2599-476c-a069-77850517dfdb&lang=ru_RU"></script>
+
 <style>
-body{margin:0;font-family:Arial;background:#1f1f1f;color:white;}
-header{background:#111;padding:15px 40px;display:flex;justify-content:space-between;align-items:center;}
-header h1{color:#00aaff;}
-nav a{color:white;margin-left:20px;text-decoration:none;}
-.container{width:1200px;margin:auto;padding:20px;}
-.hero{padding:40px 0;position:relative;}
-#map{width:100%;height:450px;border-radius:10px;margin-bottom:20px;}
-.form{display:flex;gap:10px;margin-bottom:20px;}
-input{padding:12px;border-radius:6px;border:none;flex:1;}
-button{background:#00aaff;border:none;padding:12px;border-radius:6px;font-weight:bold;cursor:pointer;}
-button:hover{background:#0088cc;}
-.telegram{position:fixed;left:20px;bottom:20px;width:60px;z-index:1000;}
-.telegram img{width:60px;}
-.truck{position:absolute;bottom:10px;left:-150px;width:150px;animation:drive 10s linear infinite;}
-@keyframes drive{0%{left:-150px;}100%{left:1250px;}}
+
+body{
+margin:0;
+font-family:Arial;
+background:#1f1f1f;
+color:white;
+}
+
+.container{
+width:1200px;
+margin:auto;
+}
+
+/* HEADER */
+
+header{
+background:#111;
+padding:15px 0;
+}
+
+.header-inner{
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
+
+.logo-block{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.logo-block img{
+height:50px;
+}
+
+nav a{
+color:white;
+margin-left:20px;
+text-decoration:none;
+font-weight:bold;
+}
+
+/* HERO */
+
+.hero{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:50px 0;
+}
+
+.hero img{
+width:500px;
+}
+
+.contact-form{
+background:#2a2a2a;
+padding:30px;
+border-radius:10px;
+width:400px;
+}
+
+.contact-form input{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:6px;
+}
+
+.contact-form button{
+margin-top:15px;
+width:100%;
+padding:12px;
+background:#00aaff;
+border:none;
+border-radius:6px;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+/* MAP */
+
+.map-section{
+padding:40px 0;
+}
+
+#map{
+height:400px;
+border-radius:10px;
+margin-bottom:20px;
+}
+
+.address-boxes{
+display:flex;
+gap:20px;
+}
+
+.address-box{
+background:#2a2a2a;
+padding:15px;
+border-radius:8px;
+flex:1;
+}
+
+.calculate{
+margin-top:20px;
+padding:12px 20px;
+background:#00aaff;
+border:none;
+border-radius:6px;
+font-weight:bold;
+cursor:pointer;
+}
+
+/* ICON BLOCK */
+
+.icons{
+display:flex;
+justify-content:space-between;
+padding:50px 0;
+text-align:center;
+}
+
+.icon-card{
+width:23%;
+background:#2a2a2a;
+padding:25px;
+border-radius:10px;
+}
+
+/* SERVICES */
+
+.services{
+background:#111;
+padding:50px 0;
+}
+
+.service-list{
+display:flex;
+gap:30px;
+}
+
+.service{
+background:#2a2a2a;
+padding:20px;
+border-radius:10px;
+flex:1;
+}
+
+/* ABOUT */
+
+.about{
+padding:50px 0;
+line-height:1.6;
+}
+
 </style>
 </head>
-<body>
-<header>
-<h1>TransCargo</h1>
-<nav>
-<a href="#">Главная</a>
-<a href="order.html">Заказать</a>
-</nav>
-</header>
 
-<div class="container">
-  <div class="hero">
-    <h2>Доставка грузов по России</h2>
-    <img src="https://cdn-icons-png.flaticon.com/512/2799/2799274.png" class="truck" alt="truck">
-    <div id="map"></div>
-    <div class="form">
-      <input id="from" placeholder="Откуда">
-      <input id="to" placeholder="Куда">
-      <button onclick="goOrder()">Рассчитать и заказать</button>
-    </div>
-  </div>
+<body>
+
+<!-- HEADER -->
+
+<header>
+
+<div class="container header-inner">
+
+<div class="logo-block">
+<img src="logo.jpg">
+<h2>TransCargo</h2>
 </div>
 
-<a class="telegram" href="https://t.me/YOUR_BOT" target="_blank">
-  <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png">
-</a>
+<nav>
+<a href="order.html">Заказать</a>
+<a href="#">Личный кабинет</a>
+</nav>
+
+</div>
+
+</header>
+
+
+<!-- HERO -->
+
+<div class="container hero">
+
+<div class="contact-form">
+
+<h3>Связаться с нами</h3>
+
+<input placeholder="Ваше имя">
+
+<input id="phone" placeholder="+7 (___) ___-__-__">
+
+<button>Отправить</button>
+
+</div>
+
+<img src="fura.jpg">
+
+</div>
+
+
+<!-- MAP -->
+
+<div class="container map-section">
+
+<div id="map"></div>
+
+<div class="address-boxes">
+
+<div class="address-box">
+<input id="from" placeholder="Откуда">
+</div>
+
+<div class="address-box">
+<input id="to" placeholder="Куда">
+</div>
+
+</div>
+
+<button class="calculate" onclick="goOrder()">Рассчитать</button>
+
+</div>
+
+
+<!-- ICONS -->
+
+<div class="container icons">
+
+<div class="icon-card">
+📄
+<h3>Отправить письмо</h3>
+</div>
+
+<div class="icon-card">
+📦
+<h3>Отправить посылку</h3>
+</div>
+
+<div class="icon-card">
+🏠
+<h3>Перевезти вещи</h3>
+</div>
+
+<div class="icon-card">
+🚛
+<h3>Выделенный транспорт</h3>
+</div>
+
+</div>
+
+
+<!-- SERVICES -->
+
+<div class="services">
+
+<div class="container service-list">
+
+<div class="service">
+📦 Упаковка груза
+</div>
+
+<div class="service">
+🛡 Страхование
+</div>
+
+<div class="service">
+🤝 Надежная сделка
+</div>
+
+<div class="service">
+📱 SMS уведомления
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ABOUT -->
+
+<div class="container about">
+
+<h2>О компании</h2>
+
+<p>
+
+TransCargo — транспортная компания, предоставляющая услуги перевозки грузов по всей России.  
+Мы доставляем письма, посылки, личные вещи и крупные грузы, а также предоставляем услуги
+выделенного транспорта.
+
+Наши преимущества:
+
+— быстрые сроки доставки  
+— страхование грузов  
+— надежная сделка  
+— SMS уведомления  
+
+</p>
+
+</div>
+
 
 <script>
+
+/* телефон маска */
+
+document.getElementById('phone').addEventListener('input', function(e){
+let x = e.target.value.replace(/\D/g,'').substring(0,11);
+let formatted = '+7 ';
+if(x.length>1) formatted+='('+x.substring(1,4);
+if(x.length>=4) formatted+=') '+x.substring(4,7);
+if(x.length>=7) formatted+='-'+x.substring(7,9);
+if(x.length>=9) formatted+='-'+x.substring(9,11);
+e.target.value=formatted;
+});
+
+/* карта */
+
 ymaps.ready(init);
-let myMap, placemarkFrom, placemarkTo;
+
+let map,fromMark,toMark;
+
 function init(){
-    myMap = new ymaps.Map("map",{center:[55.75,37.61],zoom:5});
-    myMap.events.add('click',function(e){
-        let coords = e.get('coords');
-        if(!placemarkFrom){
-            placemarkFrom = new ymaps.Placemark(coords);
-            myMap.geoObjects.add(placemarkFrom);
-            document.getElementById("from").value = coords.join(',');
-        } else if(!placemarkTo){
-            placemarkTo = new ymaps.Placemark(coords);
-            myMap.geoObjects.add(placemarkTo);
-            document.getElementById("to").value = coords.join(',');
-        }
-    });
+
+map=new ymaps.Map("map",{center:[55.75,37.61],zoom:5});
+
+map.events.add('click',function(e){
+
+let coords=e.get('coords');
+
+if(!fromMark){
+
+fromMark=new ymaps.Placemark(coords);
+map.geoObjects.add(fromMark);
+document.getElementById("from").value=coords.join(',');
+
+}else{
+
+toMark=new ymaps.Placemark(coords);
+map.geoObjects.add(toMark);
+document.getElementById("to").value=coords.join(',');
+
 }
-function updatePlacemark(id,input){
-    let val=document.getElementById(input).value;
-    ymaps.geocode(val).then(function(res){
-        let coord=res.geoObjects.get(0).geometry.getCoordinates();
-        if(id=='from'){if(placemarkFrom) myMap.geoObjects.remove(placemarkFrom); placemarkFrom=new ymaps.Placemark(coord); myMap.geoObjects.add(placemarkFrom);}
-        else{if(placemarkTo) myMap.geoObjects.remove(placemarkTo); placemarkTo=new ymaps.Placemark(coord); myMap.geoObjects.add(placemarkTo);}
-    });
+
+});
+
 }
-document.getElementById("from").addEventListener("change",()=>updatePlacemark('from','from'));
-document.getElementById("to").addEventListener("change",()=>updatePlacemark('to','to'));
+
 function goOrder(){
-    localStorage.setItem("from",document.getElementById("from").value);
-    localStorage.setItem("to",document.getElementById("to").value);
-    window.location="order.html";
+
+localStorage.setItem("from",document.getElementById("from").value);
+localStorage.setItem("to",document.getElementById("to").value);
+
+window.location="order.html";
+
 }
+
 </script>
 
-<!-- Tawk.to -->
-<script type="text/javascript">
+
+<!-- Tawk -->
+
+<script>
 var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
 (function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+var s1=document.createElement("script"),
+s0=document.getElementsByTagName("script")[0];
 s1.async=true;
 s1.src='https://embed.tawk.to/69b562ef5024d01c38daccb3/1jjm8ktpu';
 s1.charset='UTF-8';
