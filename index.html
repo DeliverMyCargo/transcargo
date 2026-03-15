@@ -1,197 +1,195 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+
 <meta charset="UTF-8">
-<title>Грузовые перевозки</title>
+<title>TransCargo</title>
 
 <script src="https://api-maps.yandex.ru/2.1/?apikey=21a0a372-2599-476c-a069-77850517dfdb&lang=ru_RU"></script>
 
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 <style>
-
-:root{
---bg:white;
---text:#222;
---card:#f5f5f5;
-}
-
-.dark{
---bg:#111;
---text:#eee;
---card:#1c1c1c;
-}
 
 body{
 margin:0;
 font-family:Arial;
-background:var(--bg);
-color:var(--text);
-transition:0.3s;
+background:#1f1f1f;
+color:white;
 }
 
-/* header */
+.container{
+width:1200px;
+margin:auto;
+}
+
+/* HEADER */
 
 header{
+background:#111;
+padding:15px 0;
+}
+
+.header-inner{
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:15px 40px;
-background:var(--bg);
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
-.logo{
+.logo-block{
 display:flex;
 align-items:center;
+gap:15px;
 }
 
-.logo img{
-height:60px;
-margin-right:15px;
+.logo-block img{
+height:50px;
 }
 
-nav button{
-padding:10px 18px;
-margin-left:10px;
-border:none;
-background:#ff6a00;
+nav a{
 color:white;
-border-radius:5px;
-cursor:pointer;
+margin-left:25px;
+text-decoration:none;
+font-weight:bold;
 }
 
-.theme{
-background:#444;
-}
-
-/* hero */
+/* HERO */
 
 .hero{
 display:flex;
-align-items:center;
 justify-content:space-between;
-padding:50px;
+align-items:center;
+padding:60px 0;
 }
 
-.contact{
-background:var(--card);
+.hero-truck{
+width:500px;
+}
+
+.contact-form{
+background:#2a2a2a;
 padding:25px;
 border-radius:10px;
-width:300px;
+width:320px;
 text-align:center;
 }
 
-.contact input{
-width:100%;
-padding:10px;
-margin:8px 0;
-border-radius:5px;
-border:1px solid #ccc;
-}
-
-.contact button{
+.contact-form input{
 width:100%;
 padding:12px;
-background:#ff6a00;
+margin-top:10px;
+border-radius:6px;
 border:none;
+}
+
+.contact-form button{
+margin-top:15px;
+width:100%;
+padding:12px;
+background:#00aaff;
+border:none;
+border-radius:6px;
 color:white;
-border-radius:5px;
+font-weight:bold;
 cursor:pointer;
 }
 
-.hero img{
-width:420px;
-}
+/* MAP */
 
-/* map */
-
-.map-block{
-padding:50px;
+.map-section{
+padding:40px 0;
 }
 
 #map{
-width:100%;
 height:420px;
-margin-bottom:20px;
 border-radius:10px;
 }
 
-.inputs{
+.address-boxes{
 display:flex;
-gap:10px;
+gap:20px;
+margin-top:20px;
 }
 
-.inputs input{
-flex:1;
-padding:10px;
-border-radius:5px;
-border:1px solid #ccc;
-}
+.address-box input{
 
-.route-btn{
-padding:10px 20px;
-background:#ff6a00;
+width:100%;
+padding:15px;
+
+border-radius:8px;
+border:1px solid #444;
+
+background:#2a2a2a;
 color:white;
+
+font-size:16px;
+
+}
+
+.calculate{
+margin-top:20px;
+padding:14px 25px;
+background:#00aaff;
 border:none;
-border-radius:5px;
+border-radius:6px;
+font-weight:bold;
 cursor:pointer;
 }
 
-.boxes{
+/* ICONS */
+
+.icons{
 display:flex;
-flex-wrap:wrap;
-gap:10px;
-margin-top:15px;
-}
-
-.box{
-padding:10px 15px;
-border-radius:6px;
-background:var(--card);
-border:1px solid #aaa;
-}
-
-/* services */
-
-.services{
-padding:60px;
+justify-content:space-between;
+padding:60px 0;
 text-align:center;
 }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:20px;
-margin-top:30px;
+.icon-card{
+background:#2a2a2a;
+width:23%;
+padding:30px;
+border-radius:10px;
 }
 
-.card{
-background:var(--card);
+.material-icons{
+font-size:40px;
+margin-bottom:10px;
+}
+
+/* SERVICES */
+
+.services{
+background:#111;
+padding:60px 0;
+}
+
+.service-list{
+display:flex;
+gap:20px;
+}
+
+.service{
+background:#2a2a2a;
 padding:25px;
 border-radius:10px;
-transition:.3s;
+flex:1;
+text-align:center;
 }
 
-.card:hover{
-transform:translateY(-5px);
-}
-
-.card img{
-width:50px;
-}
-
-/* about */
+/* ABOUT */
 
 .about{
-padding:60px;
-background:var(--card);
+padding:60px 0;
+line-height:1.6;
 }
 
-/* animation */
+/* ANIMATION */
 
 .fade{
 opacity:0;
-transform:translateY(30px);
-transition:1s;
+transform:translateY(40px);
+transition:0.8s;
 }
 
 .fade.show{
@@ -200,219 +198,342 @@ transform:none;
 }
 
 </style>
+
 </head>
 
 <body>
 
 <header>
 
-<div class="logo">
+<div class="container header-inner">
+
+<div class="logo-block">
 <img src="logo.jpg">
-<h2>Грузовые перевозки</h2>
+<h2>TransCargo</h2>
 </div>
 
 <nav>
-
-<button onclick="location.href='order.html'">Заказать</button>
-<button class="theme" onclick="toggleTheme()">🌙</button>
-
+<a href="order.html">Заказать</a>
+<a href="#">Личный кабинет</a>
 </nav>
+
+</div>
 
 </header>
 
 
-<section class="hero">
+<div class="container hero">
 
-<div class="contact">
+<img src="fura.jpg" class="hero-truck">
+
+<div class="contact-form">
 
 <h3>Связаться с нами</h3>
 
-<input id="name" placeholder="Введите имя">
-<input id="phone" placeholder="+7 (___) ___ - __ - __">
+<input placeholder="Ваше имя">
 
-<button onclick="send()">Отправить</button>
+<input id="phone" placeholder="+7 (___) ___-__-__">
+
+<button onclick="sendForm()">Отправить</button>
 
 </div>
 
-<img src="fura.jpg">
-
-</section>
+</div>
 
 
-<section class="map-block fade">
+<div class="container map-section fade">
 
-<h2>Маршрут перевозки</h2>
+<h2>Рассчитать маршрут</h2>
 
 <div id="map"></div>
 
-<div class="inputs">
+<div class="address-boxes">
 
-<input id="from" placeholder="Откуда">
-<input id="to" placeholder="Куда">
+<div class="address-box">
+<input id="from" placeholder="Откуда" onchange="setPoint('from')">
+</div>
 
-<button class="route-btn" onclick="route()">Рассчитать</button>
+<div class="address-box">
+<input id="to" placeholder="Куда" onchange="setPoint('to')">
+</div>
 
 </div>
 
-<div class="boxes" id="boxes"></div>
+<button class="calculate" onclick="goOrder()">Рассчитать</button>
 
-</section>
+</div>
 
 
-<section class="services fade">
+<div class="container fade">
 
 <h2>Наши услуги</h2>
 
-<div class="grid">
+<div class="icons">
 
-<div class="card">
-<img src="https://img.icons8.com/ios-filled/100/box.png">
-<p>Отправить посылку</p>
+<div class="icon-card">
+<span class="material-icons">mail</span>
+<h3>Отправить письмо</h3>
 </div>
 
-<div class="card">
-<img src="https://img.icons8.com/ios-filled/100/delivery.png">
-<p>Перевезти вещи</p>
+<div class="icon-card">
+<span class="material-icons">inventory</span>
+<h3>Отправить посылку</h3>
 </div>
 
-<div class="card">
-<img src="https://img.icons8.com/ios-filled/100/truck.png">
-<p>Выделенный транспорт</p>
+<div class="icon-card">
+<span class="material-icons">home</span>
+<h3>Перевезти вещи</h3>
 </div>
 
-<div class="card">
-<img src="https://img.icons8.com/ios-filled/100/mail.png">
-<p>Отправить письмо</p>
+<div class="icon-card">
+<span class="material-icons">local_shipping</span>
+<h3>Выделенный транспорт</h3>
 </div>
 
 </div>
 
-</section>
+</div>
 
 
-<section class="about fade">
+<div class="services fade">
+
+<div class="container">
+
+<h2>Дополнительные услуги</h2>
+
+<div class="service-list">
+
+<div class="service">
+Упаковка груза
+</div>
+
+<div class="service">
+Страхование
+</div>
+
+<div class="service">
+Надежная сделка
+</div>
+
+<div class="service">
+SMS уведомления
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="container about fade">
 
 <h2>О компании</h2>
 
-<p>Телефон: +7 900 000 00 00</p>
-<p>Email: info@cargo.ru</p>
+<p>
 
-<p>Офисы: Москва • СПБ • Казань • Екатеринбург</p>
+Телефон: +7 (800) 555-35-35  
+Email: info@transcargo.ru  
 
-</section>
+Офисы компании:
+
+Москва  
+Санкт-Петербург  
+Казань  
+Екатеринбург  
+
+TransCargo — транспортная компания, предоставляющая услуги доставки грузов по всей России.
+
+</p>
+
+</div>
 
 
 <script>
 
-/* theme */
+/* форма */
 
-function toggleTheme(){
-document.body.classList.toggle("dark")
-}
+function sendForm(){
 
-/* mask */
-
-document.getElementById("phone").addEventListener("input",e=>{
-
-let x=e.target.value.replace(/\D/g,'')
-
-let r="+7 ("+x.substring(1,4)
-
-if(x.length>=4) r+=") "+x.substring(4,7)
-if(x.length>=7) r+=" - "+x.substring(7,9)
-if(x.length>=9) r+=" - "+x.substring(9,11)
-
-e.target.value=r
-
-})
-
-/* form */
-
-function send(){
-
-let n=name.value
-let p=phone.value
-
-if(!n||!p){
-alert("Введите данные")
-return
-}
-
-alert("С вами скоро свяжутся")
+alert("Спасибо! С вами скоро свяжется оператор.");
 
 }
 
-/* map */
+/* телефон маска */
 
-let map
-let routeLine
-let points=[]
+document.getElementById('phone').addEventListener('input', function(e){
 
-ymaps.ready(()=>{
+let x = e.target.value.replace(/\D/g,'').substring(0,11);
 
-map=new ymaps.Map("map",{
-center:[55.75,37.61],
-zoom:5
-})
+let formatted = '+7 ';
 
-/* точки кликом */
+if(x.length>1) formatted+='('+x.substring(1,4);
+if(x.length>=4) formatted+=') '+x.substring(4,7);
+if(x.length>=7) formatted+='-'+x.substring(7,9);
+if(x.length>=9) formatted+='-'+x.substring(9,11);
 
-map.events.add("click",e=>{
+e.target.value=formatted;
 
-let coords=e.get("coords")
+});
 
-let placemark=new ymaps.Placemark(coords)
+/* карта */
 
-map.geoObjects.add(placemark)
+ymaps.ready(init);
 
-points.push(coords)
+let map,fromMark,toMark,route;
 
-})
+function init(){
 
-})
+map=new ymaps.Map("map",{center:[55.75,37.61],zoom:5});
+
+map.events.add('click',function(e){
+
+let coords=e.get('coords');
+
+if(!fromMark){
+
+fromMark=new ymaps.Placemark(coords);
+map.geoObjects.add(fromMark);
+
+getAddress(coords,"from");
+
+}
+else{
+
+if(toMark){
+map.geoObjects.remove(toMark);
+}
+
+toMark=new ymaps.Placemark(coords);
+map.geoObjects.add(toMark);
+
+getAddress(coords,"to");
+
+buildRoute();
+
+}
+
+});
+
+}
+
+/* адрес */
+
+function getAddress(coords,input){
+
+ymaps.geocode(coords).then(function(res){
+
+let address=res.geoObjects.get(0).getAddressLine();
+
+document.getElementById(input).value=address;
+
+});
+
+}
+
+/* ввод адреса */
+
+function setPoint(input){
+
+let value=document.getElementById(input).value;
+
+ymaps.geocode(value).then(function(res){
+
+let coords=res.geoObjects.get(0).geometry.getCoordinates();
+
+if(input=="from"){
+
+if(fromMark) map.geoObjects.remove(fromMark);
+
+fromMark=new ymaps.Placemark(coords);
+map.geoObjects.add(fromMark);
+
+}
+
+if(input=="to"){
+
+if(toMark) map.geoObjects.remove(toMark);
+
+toMark=new ymaps.Placemark(coords);
+map.geoObjects.add(toMark);
+
+}
+
+buildRoute();
+
+});
+
+}
 
 /* маршрут */
 
-function route(){
+function buildRoute(){
 
-let from=document.getElementById("from").value
-let to=document.getElementById("to").value
+if(fromMark && toMark){
 
-if(!from||!to){
-alert("Введите адрес")
-return
+let from=fromMark.geometry.getCoordinates();
+let to=toMark.geometry.getCoordinates();
+
+if(route){
+map.geoObjects.remove(route);
 }
 
-if(routeLine){
-map.geoObjects.remove(routeLine)
-}
+ymaps.route([from,to]).then(function(r){
 
-routeLine=new ymaps.multiRouter.MultiRoute({
-referencePoints:[from,to],
-params:{routingMode:"truck"}
-})
+route=r;
+map.geoObjects.add(route);
 
-map.geoObjects.add(routeLine)
-
-boxes.innerHTML=`
-<div class="box">${from}</div>
-<div class="box">${to}</div>
-`
+});
 
 }
 
-/* animation */
-
-let obs=new IntersectionObserver(e=>{
-e.forEach(x=>{
-if(x.isIntersecting){
-x.target.classList.add("show")
 }
-})
-})
 
-document.querySelectorAll(".fade").forEach(el=>obs.observe(el))
+/* переход */
 
+function goOrder(){
+
+localStorage.setItem("from",document.getElementById("from").value);
+localStorage.setItem("to",document.getElementById("to").value);
+
+window.location="order.html";
+
+}
+
+/* анимация */
+
+let blocks=document.querySelectorAll(".fade");
+
+window.addEventListener("scroll",function(){
+
+blocks.forEach(b=>{
+
+let pos=b.getBoundingClientRect().top;
+
+if(pos<window.innerHeight-100){
+
+b.classList.add("show");
+
+}
+
+});
+
+});
+
+</script>
+
+
+<script>
+var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),
+s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/69b562ef5024d01c38daccb3/1jjm8ktpu';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
 </script>
 
 </body>
