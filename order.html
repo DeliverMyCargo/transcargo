@@ -7,12 +7,8 @@
 <script src="https://api-maps.yandex.ru/2.1/?apikey=21a0a372-2599-476c-a069-77850517dfdb&lang=ru_RU"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
-:root{
-  --bg:#fff; --text:#111; --card:#f3f3f3; --header:#fff; --accent:#00aaff; --border:#ddd;
-}
-.dark{
-  --bg:#1f1f1f; --text:#fff; --card:#2a2a2a; --header:#111; --accent:#00aaff; --border:#444;
-}
+:root{ --bg:#fff; --text:#111; --card:#f3f3f3; --header:#fff; --accent:#00aaff; --border:#ddd; }
+.dark{ --bg:#1f1f1f; --text:#fff; --card:#2a2a2a; --header:#111; --accent:#00aaff; --border:#444; }
 body{margin:0;font-family:Arial;background:var(--bg);color:var(--text);transition:0.3s;}
 .container{width:1400px;max-width:95%;margin:auto;}
 header{background:var(--header);padding:15px 0;border-bottom:1px solid var(--border);}
@@ -26,7 +22,7 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 .contact-form{background:var(--card);padding:25px;border-radius:10px;width:100%;max-width:1400px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
 .contact-form input{width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);}
 .select-cargo, .select-package, .select-truck{display:flex;gap:15px;margin-top:15px;flex-wrap:wrap;}
-.cargo-card, .package-card, .truck-card{flex:1;min-width:120px;text-align:center;padding:15px;border-radius:10px;background:var(--card);cursor:pointer;transition:.2s;border:2px solid transparent;}
+.cargo-card, .package-card, .truck-card{flex:1;min-width:120px;text-align:center;padding:15px;border-radius:10px;background:var(--card);cursor:pointer;transition:.2s;border:2px solid transparent;position:relative;}
 .cargo-card img, .package-card img, .truck-card img{width:80px;height:80px;margin-bottom:5px;}
 .cargo-card.active, .package-card.active, .truck-card.active{border-color:var(--accent); background:var(--accent); color:#fff;}
 .size-weight, .truck-type{margin-top:15px; display:none;}
@@ -38,303 +34,240 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 .option{padding:12px;border-radius:8px;background:var(--card);cursor:pointer;transition:.2s;font-weight:normal;}
 .option.active{font-weight:bold;background:var(--accent);color:#fff;}
 #map{height:500px;border-radius:10px;margin-top:15px;}
-
-/* Транспорт */
-.select-truck{display:flex; flex-wrap:wrap; gap:15px;}
 .truck-card{flex:0 1 23%; text-align:center; padding:10px; border-radius:10px; background:var(--card); cursor:pointer; transition:.2s; border:2px solid transparent; position:relative;}
 .truck-card img{width:100%; height:120px; object-fit:contain; margin-bottom:10px;}
 .truck-card b{display:block; font-size:16px; margin-bottom:5px;}
-.truck-card.active{border-color:var(--accent); background:var(--accent); color:#fff;}
 .hover-info{position:absolute; bottom:10px; left:10px; right:10px; background:rgba(0,0,0,0.7); color:#fff; padding:5px; border-radius:5px; font-size:12px; opacity:0; transition:.2s;}
-.truck-card:hover .hover-info{opacity:1;}
+.truck-card:hover .hover-info, .package-card:hover .hover-info{opacity:1;}
 h5{margin-top:20px; margin-bottom:10px;}
 </style>
 </head>
 <body>
-
 <header>
 <div class="container header-inner">
-  <div class="logo-block" onclick="window.location='index.html'">
-    <img src="logo.jpg">
-    <h2>TransCargo</h2>
-  </div>
-  <nav>
-    <span class="material-icons theme-toggle" onclick="toggleTheme()">dark_mode</span>
-    <a href="https://t.me/transcargo_support" target="_blank">Telegram</a>
-    <a href="index.html">Главная</a>
-    <a href="#">Личный кабинет</a>
-  </nav>
+<div class="logo-block" onclick="window.location='index.html'">
+<img src="logo.jpg">
+<h2>TransCargo</h2>
+</div>
+<nav>
+<span class="material-icons theme-toggle" onclick="toggleTheme()">dark_mode</span>
+<a href="https://t.me/transcargo_support" target="_blank">Telegram</a>
+<a href="index.html">Главная</a>
+<a href="#">Личный кабинет</a>
+</nav>
 </div>
 </header>
-
 <div class="container hero">
 <h2>Оформить заказ</h2>
 <div class="contact-form">
-
 <h3>Данные отправителя</h3>
 <input id="sender_name" placeholder="Ваше имя">
 <input id="sender_phone" placeholder="+7 (___) ___-__-__">
 <input id="sender_email" placeholder="Email">
-
 <h3>Данные получателя</h3>
 <input id="receiver_name" placeholder="Имя получателя">
 <input id="receiver_phone" placeholder="+7 (___) ___-__-__">
 <input id="receiver_email" placeholder="Email">
-
 <h3>Адреса</h3>
 <div class="address-boxes">
-  <div class="address-box"><input id="from" placeholder="Откуда" onchange="setPoint('from')"></div>
-  <div class="address-box"><input id="to" placeholder="Куда" onchange="setPoint('to')"></div>
+<div class="address-box"><input id="from" placeholder="Откуда" onchange="setPoint('from')"></div>
+<div class="address-box"><input id="to" placeholder="Куда" onchange="setPoint('to')"></div>
 </div>
 <div id="map"></div>
 
 <h3>Что перевозим</h3>
 <div class="select-cargo">
-  <div class="cargo-card" data-type="letter" onclick="selectCargo(this)">
-    <img src="letter.png"><br>Письмо
-  </div>
-  <div class="cargo-card" data-type="package" onclick="selectCargo(this)">
-    <img src="package.png"><br>Посылка
-  </div>
-  <div class="cargo-card" data-type="move" onclick="selectCargo(this)">
-    <img src="move.png"><br>Переезд
-  </div>
-  <div class="cargo-card" data-type="dedicated" onclick="selectCargo(this)">
-    <img src="truck.png"><br>Выделенный транспорт
-  </div>
+<div class="cargo-card" data-type="letter" onclick="selectCargo(this)">
+<img src="letter.png"><br>Письмо
+</div>
+<div class="cargo-card" data-type="package" onclick="selectCargo(this)">
+<img src="package.png"><br>Посылка
+</div>
+<div class="cargo-card" data-type="move" onclick="selectCargo(this)">
+<img src="move.png"><br>Переезд
+</div>
+<div class="cargo-card" data-type="dedicated" onclick="selectCargo(this)">
+<img src="truck.png"><br>Выделенный транспорт
+</div>
 </div>
 
 <div class="size-weight" id="size-weight">
-  <h4>Выберите размер коробки</h4>
-  <div class="select-package" id="select-package">
-    <div class="package-card" data-dim="17x12x9" data-weight="0.5" onclick="selectPackage(this)">
-      <img src="packagexs.svg"><br>XS
-    </div>
-    <div class="package-card" data-dim="23x19x10" data-weight="2" onclick="selectPackage(this)">
-      <img src="packages.svg"><br>S
-    </div>
-    <div class="package-card" data-dim="33x25x15" data-weight="5" onclick="selectPackage(this)">
-      <img src="packagem.svg"><br>M
-    </div>
-    <div class="package-card" data-dim="31x25x38" data-weight="12" onclick="selectPackage(this)">
-      <img src="packagel.svg"><br>L
-    </div>
-    <div class="package-card" data-dim="60x35x30" data-weight="18" onclick="selectPackage(this)">
-      <img src="packagexl.svg"><br>XL
-    </div>
-    <div class="package-card" data-dim="custom" data-weight="0" onclick="selectPackage(this)">
-      <img src="fura.jpg"><br>Свой размер
-    </div>
-  </div>
+<h4>Выберите размер коробки</h4>
+<div class="select-package" id="select-package">
+<div class="package-card" data-dim="17x12x9" data-weight="0.5" onclick="selectPackage(this)">
+<img src="packagexs.svg"><br>XS
+<div class="hover-info"></div>
+</div>
+<div class="package-card" data-dim="23x19x10" data-weight="2" onclick="selectPackage(this)">
+<img src="packages.svg"><br>S
+<div class="hover-info"></div>
+</div>
+<div class="package-card" data-dim="33x25x15" data-weight="5" onclick="selectPackage(this)">
+<img src="packagem.svg"><br>M
+<div class="hover-info"></div>
+</div>
+<div class="package-card" data-dim="31x25x38" data-weight="12" onclick="selectPackage(this)">
+<img src="packagel.svg"><br>L
+<div class="hover-info"></div>
+</div>
+<div class="package-card" data-dim="60x35x30" data-weight="18" onclick="selectPackage(this)">
+<img src="packagexl.svg"><br>XL
+<div class="hover-info"></div>
+</div>
+<div class="package-card" data-dim="custom" data-weight="0" onclick="selectPackage(this)">
+<img src="fura.jpg"><br>Свой размер
+<div class="hover-info"></div>
+</div>
+</div>
 
-  <div class="custom-package" id="custom-package">
-    <input id="custom_length" placeholder="Длина (см)">
-    <input id="custom_width" placeholder="Ширина (см)">
-    <input id="custom_height" placeholder="Высота (см)">
-    <input id="custom_weight" placeholder="Вес (кг)">
-  </div>
+<div class="custom-package" id="custom-package">
+<input id="custom_length" placeholder="Длина (см)">
+<input id="custom_width" placeholder="Ширина (см)">
+<input id="custom_height" placeholder="Высота (см)">
+<input id="custom_weight" placeholder="Вес (кг)">
+</div>
 </div>
 
 <div class="truck-type" id="truck-type">
-  <h4>Выберите транспорт</h4>
+<h4>Выберите транспорт</h4>
+<h5>Кузов</h5>
+<div class="select-truck">
+<div class="truck-card" data-name="S" data-base="1500" data-km="50" data-dim="170x90x100 см" data-weight="до 300 кг">
+<img src="trucks.png">
+<b>S</b>
+<div class="hover-info"></div>
+</div>
+<div class="truck-card" data-name="M" data-base="3000" data-km="50" data-dim="260x130x150 см" data-weight="до 700 кг">
+<img src="truckm.png">
+<b>M</b>
+<div class="hover-info"></div>
+</div>
+<div class="truck-card" data-name="L" data-base="5000" data-km="50" data-dim="380x180x180 см" data-weight="до 1400 кг">
+<img src="truckl.png">
+<b>L</b>
+<div class="hover-info"></div>
+</div>
+<div class="truck-card" data-name="XL" data-base="7000" data-km="50" data-dim="400x190x200 см" data-weight="до 2000 кг">
+<img src="truckxl.png">
+<b>XL</b>
+<div class="hover-info"></div>
+</div>
+</div>
 
-  <h5>Кузов</h5>
-  <div class="select-truck">
-    <div class="truck-card" data-name="S" data-base="1500" data-km="50" data-dim="170x90x100 см" data-weight="до 300 кг">
-      <img src="trucks.png">
-      <b>S</b>
-      <div class="hover-info"></div>
-    </div>
-    <div class="truck-card" data-name="M" data-base="3000" data-km="50" data-dim="260x130x150 см" data-weight="до 700 кг">
-      <img src="truckm.png">
-      <b>M</b>
-      <div class="hover-info"></div>
-    </div>
-    <div class="truck-card" data-name="L" data-base="5000" data-km="50" data-dim="380x180x180 см" data-weight="до 1400 кг">
-      <img src="truckl.png">
-      <b>L</b>
-      <div class="hover-info"></div>
-    </div>
-    <div class="truck-card" data-name="XL" data-base="7000" data-km="50" data-dim="400x190x200 см" data-weight="до 2000 кг">
-      <img src="truckxl.png">
-      <b>XL</b>
-      <div class="hover-info"></div>
-    </div>
-  </div>
-
-  <h5>Спецтехника</h5>
-  <div class="select-truck">
-    <div class="truck-card" data-name="Platform" data-base="15000" data-km="70" data-dim="13600x245x260 см" data-weight="до 20000 кг">
-      <img src="truckplatf.jpg">
-      <b>Платформа</b>
-      <div class="hover-info"></div>
-    </div>
-    <div class="truck-card" data-name="Euro" data-base="20000" data-km="70" data-dim="13600x245x270 см" data-weight="до 20000 кг">
-      <img src="truckeuro.jpg">
-      <b>Еврофура</b>
-      <div class="hover-info"></div>
-    </div>
-    <div class="truck-card" data-name="Refrigerator" data-base="30000" data-km="70" data-dim="13600x245x260 см" data-weight="до 18000 кг">
-      <img src="truckref.jpg">
-      <b>Рефрижератор</b>
-      <div class="hover-info"></div>
-    </div>
-    <div class="truck-card" data-name="Isoterm" data-base="30000" data-km="70" data-dim="13600x245x260 см" data-weight="до 18000 кг">
-      <img src="truckisoterm.jpg">
-      <b>Изотермический</b>
-      <div class="hover-info"></div>
-    </div>
-  </div>
+<h5>Спецтехника</h5>
+<div class="select-truck">
+<div class="truck-card" data-name="Platform" data-base="15000" data-km="70" data-dim="13600x245x260 см" data-weight="до 20000 кг">
+<img src="truckplatf.jpg">
+<b>Платформа</b>
+<div class="hover-info"></div>
+</div>
+<div class="truck-card" data-name="Euro" data-base="20000" data-km="70" data-dim="13600x245x270 см" data-weight="до 20000 кг">
+<img src="truckeuro.jpg">
+<b>Еврофура</b>
+<div class="hover-info"></div>
+</div>
+<div class="truck-card" data-name="Refrigerator" data-base="30000" data-km="70" data-dim="13600x245x260 см" data-weight="до 18000 кг">
+<img src="truckref.jpg">
+<b>Рефрижератор</b>
+<div class="hover-info"></div>
+</div>
+<div class="truck-card" data-name="Isoterm" data-base="30000" data-km="70" data-dim="13600x245x260 см" data-weight="до 18000 кг">
+<img src="truckisoterm.jpg">
+<b>Изотермический</b>
+<div class="hover-info"></div>
+</div>
+</div>
 </div>
 
 <h3>Дополнительные услуги</h3>
 <div class="options">
-  <div class="option" onclick="toggleOption(this,'insurance')">Страховка (10%)</div>
-  <div class="option" onclick="toggleOption(this,'secure')">Надежная сделка (3%)</div>
-  <div class="option" onclick="toggleOption(this,'sms')">SMS уведомления (+20₽)</div>
-  <div class="option" onclick="toggleOption(this,'pack')">Упаковка груза</div>
+<div class="option" onclick="toggleOption(this,'insurance')">Страховка (10%)</div>
+<div class="option" onclick="toggleOption(this,'secure')">Надежная сделка (3%)</div>
+<div class="option" onclick="toggleOption(this,'sms')">SMS уведомления (+20₽)</div>
+<div class="option" onclick="toggleOption(this,'pack')">Упаковка груза</div>
 </div>
 
 <button class="calculate" onclick="calculateOrder()">Рассчитать стоимость</button>
 <div class="summary" id="summary"><b>Стоимость:</b> 0₽</div>
 <button class="calculate" onclick="sendOrder()">Оформить заказ</button>
-
 </div>
 </div>
 
-<footer>
-© 2026 TransCargo
-</footer>
+<footer>© 2026 TransCargo</footer>
 
 <script>
-// Theme
-function toggleTheme(){
-  document.body.classList.toggle("dark");
-  localStorage.setItem("theme",document.body.classList.contains("dark")?"dark":"light");
-}
+// Theme toggle
+function toggleTheme(){document.body.classList.toggle("dark"); localStorage.setItem("theme",document.body.classList.contains("dark")?"dark":"light");}
 if(localStorage.getItem("theme")=="dark") document.body.classList.add("dark");
 
 // Phone mask
 ['sender_phone','receiver_phone'].forEach(id=>{
-  document.getElementById(id).addEventListener('input',e=>{
-    let x=e.target.value.replace(/\D/g,'').substring(0,11);
-    let f='+7 ';
-    if(x.length>1) f+='('+x.substring(1,4);
-    if(x.length>=4) f+=') '+x.substring(4,7);
-    if(x.length>=7) f+='-'+x.substring(7,9);
-    if(x.length>=9) f+='-'+x.substring(9,11);
-    e.target.value=f;
-  });
+document.getElementById(id).addEventListener('input',e=>{
+let x=e.target.value.replace(/\D/g,'').substring(0,11);
+let f='+7 '; if(x.length>1) f+='('+x.substring(1,4); if(x.length>=4) f+=') '+x.substring(4,7); if(x.length>=7) f+='-'+x.substring(7,9); if(x.length>=9) f+='-'+x.substring(9,11); e.target.value=f;
+});
 });
 
-// Map
-ymaps.ready(init);
-let map, fromMark, toMark, route;
-function init(){
-  map=new ymaps.Map("map",{center:[55.75,37.61],zoom:5});
-  let savedFrom=localStorage.getItem('from');
-  let savedTo=localStorage.getItem('to');
-  if(savedFrom){document.getElementById('from').value=savedFrom; setPoint('from');}
-  if(savedTo){document.getElementById('to').value=savedTo; setPoint('to');}
-  map.events.add('click',e=>{
-    let coords=e.get('coords');
-    if(!fromMark){ fromMark=new ymaps.Placemark(coords); map.geoObjects.add(fromMark); getAddress(coords,'from'); }
-    else { if(toMark) map.geoObjects.remove(toMark); toMark=new ymaps.Placemark(coords); map.geoObjects.add(toMark); getAddress(coords,'to'); }
-    buildRoute();
-  });
-}
-function getAddress(coords,input){
-  ymaps.geocode(coords).then(res=>{
-    let addr=res.geoObjects.get(0).getAddressLine();
-    document.getElementById(input).value=addr;
-    localStorage.setItem(input,addr);
-  });
-}
-function setPoint(input){
-  let value=document.getElementById(input).value;
-  if(!value) return;
-  ymaps.geocode(value).then(res=>{
-    let coords=res.geoObjects.get(0).geometry.getCoordinates();
-    if(input=='from'){if(fromMark) map.geoObjects.remove(fromMark); fromMark=new ymaps.Placemark(coords); map.geoObjects.add(fromMark);}
-    if(input=='to'){if(toMark) map.geoObjects.remove(toMark); toMark=new ymaps.Placemark(coords); map.geoObjects.add(toMark);}
-    buildRoute();
-  });
-}
-function buildRoute(){
-  if(fromMark && toMark){
-    let from=fromMark.geometry.getCoordinates();
-    let to=toMark.geometry.getCoordinates();
-    if(route) map.geoObjects.remove(route);
-    ymaps.route([from,to]).then(r=>{route=r; map.geoObjects.add(route);});
-  }
-}
+// Yandex map
+ymaps.ready(init); let map, fromMark, toMark, route;
+function init(){ map=new ymaps.Map("map",{center:[55.75,37.61],zoom:5}); let savedFrom=localStorage.getItem('from'); let savedTo=localStorage.getItem('to');
+if(savedFrom){document.getElementById('from').value=savedFrom; setPoint('from');} if(savedTo){document.getElementById('to').value=savedTo; setPoint('to');}
+map.events.add('click',e=>{ let coords=e.get('coords'); if(!fromMark){ fromMark=new ymaps.Placemark(coords); map.geoObjects.add(fromMark); getAddress(coords,'from'); } else { if(toMark) map.geoObjects.remove(toMark); toMark=new ymaps.Placemark(coords); map.geoObjects.add(toMark); getAddress(coords,'to'); } buildRoute(); }); }
+function getAddress(coords,input){ ymaps.geocode(coords).then(res=>{ let addr=res.geoObjects.get(0).getAddressLine(); document.getElementById(input).value=addr; localStorage.setItem(input,addr); }); }
+function setPoint(input){ let value=document.getElementById(input).value; if(!value) return; ymaps.geocode(value).then(res=>{ let coords=res.geoObjects.get(0).geometry.getCoordinates(); if(input=='from'){if(fromMark) map.geoObjects.remove(fromMark); fromMark=new ymaps.Placemark(coords); map.geoObjects.add(fromMark);} if(input=='to'){if(toMark) map.geoObjects.remove(toMark); toMark=new ymaps.Placemark(coords); map.geoObjects.add(toMark);} buildRoute(); }); }
+function buildRoute(){ if(fromMark && toMark){ let from=fromMark.geometry.getCoordinates(); let to=toMark.geometry.getCoordinates(); if(route) map.geoObjects.remove(route); ymaps.route([from,to]).then(r=>{route=r; map.geoObjects.add(route);}); } }
 
 // Cargo selection
 let selectedCargo=null;
-function selectCargo(el){
-  document.querySelectorAll('.cargo-card').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  selectedCargo={type:el.dataset.type};
-  document.getElementById('size-weight').style.display=(selectedCargo.type==='package')?'block':'none';
-  document.getElementById('truck-type').style.display=(selectedCargo.type==='dedicated')?'block':'none';
+function selectCargo(el){ document.querySelectorAll('.cargo-card').forEach(c=>c.classList.remove('active')); el.classList.add('active'); selectedCargo={type:el.dataset.type};
+document.getElementById('size-weight').style.display=(selectedCargo.type==='package')?'block':'none';
+document.getElementById('truck-type').style.display=(selectedCargo.type==='dedicated')?'block':'none';
 }
 
 // Package selection
 let selectedPackage=null;
 function selectPackage(el){
-  document.querySelectorAll('.package-card').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  selectedPackage={dim:el.dataset.dim, weight:parseFloat(el.dataset.weight)};
-  document.getElementById('custom-package').style.display=el.dataset.dim==='custom'?'block':'none';
+document.querySelectorAll('.package-card').forEach(c=>c.classList.remove('active')); el.classList.add('active');
+selectedPackage={dim:el.dataset.dim, weight:parseFloat(el.dataset.weight)};
+document.getElementById('custom-package').style.display=el.dataset.dim==='custom'?'block':'none';
 }
 
 // Truck selection
 let selectedTruck=null;
-document.querySelectorAll('.truck-card').forEach(el=>{
-  el.addEventListener('click',()=>{
-    document.querySelectorAll('.truck-card').forEach(c=>c.classList.remove('active'));
-    el.classList.add('active');
-    selectedTruck={base:parseFloat(el.dataset.base), km:parseFloat(el.dataset.km)};
-  });
-});
+document.querySelectorAll('.truck-card').forEach(el=>{ el.addEventListener('click',()=>{
+document.querySelectorAll('.truck-card').forEach(c=>c.classList.remove('active')); el.classList.add('active');
+selectedTruck={base:parseFloat(el.dataset.base), km:parseFloat(el.dataset.km)}; }); });
 
-// Hover info
-document.querySelectorAll('.truck-card').forEach(card=>{
-  let info = `Размер: ${card.dataset.dim}, Вес: ${card.dataset.weight}`;
-  card.querySelector('.hover-info').innerText = info;
+// Hover info for trucks & packages
+document.querySelectorAll('.truck-card, .package-card').forEach(card=>{
+if(card.dataset.dim!=='custom'){ card.querySelector('.hover-info').innerText=`Размер: ${card.dataset.dim} см, Вес: до ${card.dataset.weight} кг`; } 
+else { card.querySelector('.hover-info').innerText="Свой размер"; }
 });
 
 // Options
 let selectedOptions={};
-function toggleOption(el,id){
-  if(selectedOptions[id]){delete selectedOptions[id];el.classList.remove("active");}
-  else{selectedOptions[id]=true;el.classList.add("active");}
-}
+function toggleOption(el,id){ if(selectedOptions[id]){delete selectedOptions[id];el.classList.remove("active");} else{selectedOptions[id]=true;el.classList.add("active");} }
 
 // Calculate order
 function calculateOrder(){
-  if(!selectedCargo){alert("Выберите тип груза"); return;}
-  let distance=(fromMark&&toMark)?ymaps.coordSystem.geo.getDistance(fromMark.geometry.getCoordinates(),toMark.geometry.getCoordinates())/1000:0;
-  let price=0;
-
-  if(selectedCargo.type==='letter') {
-    price = 100 + 60 + distance*50;
-    if(price > 300) price = 300;
-  } else if(selectedCargo.type==='package'){
-    if(!selectedPackage){alert("Выберите коробку"); return;}
-    switch(selectedPackage.dim){
-      case '17x12x9': price = 100+50+distance*0.05; break;
-      case '23x19x10': price = 100+100+distance*0.06; break;
-      case '33x25x15': price = 300+150+distance*0.07; break;
-      case '31x25x38': price = 400+230+distance*0.08; break;
-      case '60x35x30': price = 600+270+distance*0.1; break;
-      case 'custom':
-        let l=parseFloat(document.getElementById('custom_length').value)||0;
-        let w=parseFloat(document.getElementById('custom_width').value)||0;
-        let h=parseFloat(document.getElementById('custom_height').value)||0;
-        let weight=parseFloat(document.getElementById('custom_weight').value)||0;
-        let volume = l*w*h/1000; // литры
-        price = 100 + 100 + volume*5 + distance*0.07;
+if(!selectedCargo){alert("Выберите тип груза"); return;}
+let distance=(fromMark&&toMark)?ymaps.coordSystem.geo.getDistance(fromMark.geometry.getCoordinates(),toMark.geometry.getCoordinates())/1000:0;
+let price=0;
+if(selectedCargo.type==='letter'){ price=100+60+distance*50; if(price>300) price=300;}
+else if(selectedCargo.type==='package'){
+if(!selectedPackage){alert("Выберите коробку"); return;}
+switch(selectedPackage.dim){
+case '17x12x9': price=100+50+distance*0.05; break;
+case '23x19x10': price=100+100+distance*0.06; break;
+case '33x25x15': price=300+150+distance*0.07; break;
+case '31x25x38': price=400+230+distance*0.08; break;
+case '60x35x30': price=600+270+distance*0.1; break;
+case 'custom':
+let l=parseFloat(document.getElementById('custom_length').value)||0;
+let w=parseFloat(document.getElementById('custom_width').value)||0;
+let h=parseFloat(document.getElementById('custom_height').value)||0;
+let weight=parseFloat(document.getElementById('custom_weight').value)||0;
+let volume=l*w*h/1000; price=100+100+volume*5+distance*0.07;
         break;
     }
   } else if(selectedCargo.type==='move'){
