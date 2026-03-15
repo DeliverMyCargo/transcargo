@@ -313,7 +313,7 @@ function calculateOrder(){
   if(!selectedCargo){alert("Выберите тип груза"); return;}
   let distance=(fromMark&&toMark)?ymaps.coordSystem.geo.getDistance(fromMark.geometry.getCoordinates(),toMark.geometry.getCoordinates())/1000:0;
   let price=0;
-  if(selectedCargo.type==='letter') price = 100 + 60 + distance*0.005;
+  if(selectedCargo.type==='letter') price = 100 + 60 + distance*0.5;
   else if(selectedCargo.type==='package'){
     if(!selectedPackage){alert("Выберите коробку"); return;}
     switch(selectedPackage.dim){
