@@ -25,10 +25,10 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 .hero{display:flex;flex-direction:column;gap:30px;padding:40px 0;}
 .contact-form{background:var(--card);padding:25px;border-radius:10px;width:100%;max-width:1400px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
 .contact-form input{width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);}
-.select-cargo, .select-package{display:flex;gap:15px;margin-top:15px;flex-wrap:wrap;}
-.cargo-card, .package-card{flex:1;min-width:100px;text-align:center;padding:15px;border-radius:10px;background:var(--card);cursor:pointer;transition:.2s;border:2px solid transparent;}
-.cargo-card img, .package-card img{width:50px;height:50px;margin-bottom:5px;}
-.cargo-card.active, .package-card.active{border-color:var(--accent); background:var(--accent); color:#fff;}
+.select-cargo, .select-package, .select-truck{display:flex;gap:15px;margin-top:15px;flex-wrap:wrap;}
+.cargo-card, .package-card, .truck-card{flex:1;min-width:120px;text-align:center;padding:15px;border-radius:10px;background:var(--card);cursor:pointer;transition:.2s;border:2px solid transparent;}
+.cargo-card img, .package-card img, .truck-card img{width:80px;height:80px;margin-bottom:5px;}
+.cargo-card.active, .package-card.active, .truck-card.active{border-color:var(--accent); background:var(--accent); color:#fff;}
 .size-weight, .truck-type{margin-top:15px; display:none;}
 .size-weight input, .size-weight select, .truck-type select{width:100%;padding:8px;margin-top:5px;border-radius:5px;border:1px solid var(--border);}
 .custom-package input{width:48%;margin-right:4%;margin-top:5px;padding:8px;border-radius:5px;border:1px solid var(--border);}
@@ -80,39 +80,39 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 
 <h3>Что перевозим</h3>
 <div class="select-cargo">
-  <div class="cargo-card" data-type="letter" data-price="90" onclick="selectCargo(this)">
-    <img src="letter.png"><br>Письмо<br>от 90₽
+  <div class="cargo-card" data-type="letter" onclick="selectCargo(this)">
+    <img src="letter.png"><br>Письмо
   </div>
-  <div class="cargo-card" data-type="package" data-price="200" onclick="selectCargo(this)">
-    <img src="package.png"><br>Посылка<br>от 200₽
+  <div class="cargo-card" data-type="package" onclick="selectCargo(this)">
+    <img src="package.png"><br>Посылка
   </div>
-  <div class="cargo-card" data-type="move" data-price="2000" onclick="selectCargo(this)">
-    <img src="move.png"><br>Переезд<br>от 2000₽
+  <div class="cargo-card" data-type="move" onclick="selectCargo(this)">
+    <img src="move.png"><br>Переезд
   </div>
-  <div class="cargo-card" data-type="dedicated" data-price="30000" onclick="selectCargo(this)">
-    <img src="truck.png"><br>Выделенный транспорт<br>от 30000₽
+  <div class="cargo-card" data-type="dedicated" onclick="selectCargo(this)">
+    <img src="truck.png"><br>Выделенный транспорт
   </div>
 </div>
 
 <div class="size-weight" id="size-weight">
   <h4>Выберите размер коробки</h4>
   <div class="select-package" id="select-package">
-    <div class="package-card" data-dim="17x12x9" data-weight="0.5" data-price="150" onclick="selectPackage(this)">
-      <img src="packagexs.svg"><br>XS<br>0,5 кг
+    <div class="package-card" data-dim="17x12x9" data-weight="0.5" onclick="selectPackage(this)">
+      <img src="packagexs.svg"><br>XS
     </div>
-    <div class="package-card" data-dim="23x19x10" data-weight="2" data-price="200" onclick="selectPackage(this)">
-      <img src="packages.svg"><br>S<br>2 кг
+    <div class="package-card" data-dim="23x19x10" data-weight="2" onclick="selectPackage(this)">
+      <img src="packages.svg"><br>S
     </div>
-    <div class="package-card" data-dim="33x25x15" data-weight="5" data-price="250" onclick="selectPackage(this)">
-      <img src="packagem.svg"><br>M<br>5 кг
+    <div class="package-card" data-dim="33x25x15" data-weight="5" onclick="selectPackage(this)">
+      <img src="packagem.svg"><br>M
     </div>
-    <div class="package-card" data-dim="31x25x38" data-weight="12" data-price="300" onclick="selectPackage(this)">
-      <img src="packagel.svg"><br>L<br>12 кг
+    <div class="package-card" data-dim="31x25x38" data-weight="12" onclick="selectPackage(this)">
+      <img src="packagel.svg"><br>L
     </div>
-    <div class="package-card" data-dim="60x35x30" data-weight="18" data-price="400" onclick="selectPackage(this)">
-      <img src="packagexl.svg"><br>XL<br>18 кг
+    <div class="package-card" data-dim="60x35x30" data-weight="18" onclick="selectPackage(this)">
+      <img src="packagexl.svg"><br>XL
     </div>
-    <div class="package-card" data-dim="custom" data-weight="0" data-price="0" onclick="selectPackage(this)">
+    <div class="package-card" data-dim="custom" data-weight="0" onclick="selectPackage(this)">
       <img src="fura.jpg"><br>Свой размер
     </div>
   </div>
@@ -123,12 +123,33 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 </div>
 
 <div class="truck-type" id="truck-type">
-  <h4>Тип кузова для выделенного транспорта</h4>
-  <select id="truck_body">
-    <option value="box">Фургон</option>
-    <option value="flat">Платформа</option>
-    <option value="refrigerator">Рефрижератор</option>
-  </select>
+  <h4>Выберите транспорт</h4>
+  <div class="select-truck">
+    <div class="truck-card" data-name="S" data-base="1500" data-km="50">
+      <img src="trucks.png"><br>S 170x90x100
+    </div>
+    <div class="truck-card" data-name="M" data-base="3000" data-km="50">
+      <img src="truckm.png"><br>M 260x130x150
+    </div>
+    <div class="truck-card" data-name="L" data-base="5000" data-km="50">
+      <img src="truckl.png"><br>L 380x180x180
+    </div>
+    <div class="truck-card" data-name="XL" data-base="7000" data-km="50">
+      <img src="truckxl.png"><br>XL 400x190x200
+    </div>
+    <div class="truck-card" data-name="Platform" data-base="15000" data-km="70">
+      <img src="truckplatf.jpg"><br>Платформа
+    </div>
+    <div class="truck-card" data-name="Euro" data-base="20000" data-km="70">
+      <img src="truckeuro.jpg"><br>Еврофура
+    </div>
+    <div class="truck-card" data-name="Refrigerator" data-base="30000" data-km="70">
+      <img src="truckref.jpg"><br>Рефрижератор
+    </div>
+    <div class="truck-card" data-name="Isoterm" data-base="30000" data-km="70">
+      <img src="truckisoterm.jpg"><br>Изотермический
+    </div>
+  </div>
 </div>
 
 <h3>Дополнительные услуги</h3>
@@ -222,7 +243,7 @@ let selectedCargo=null;
 function selectCargo(el){
   document.querySelectorAll('.cargo-card').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
-  selectedCargo={type:el.dataset.type, basePrice:parseInt(el.dataset.price)};
+  selectedCargo={type:el.dataset.type};
   document.getElementById('size-weight').style.display=(selectedCargo.type==='package')?'block':'none';
   document.getElementById('truck-type').style.display=(selectedCargo.type==='dedicated')?'block':'none';
 }
@@ -232,16 +253,21 @@ let selectedPackage=null;
 function selectPackage(el){
   document.querySelectorAll('.package-card').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
-  selectedPackage={
-    dim:el.dataset.dim,
-    weight:parseFloat(el.dataset.weight),
-    price:parseInt(el.dataset.price)
-  };
+  selectedPackage={dim:el.dataset.dim, weight:parseFloat(el.dataset.weight)};
   document.getElementById('custom-package').style.display=el.dataset.dim==='custom'?'block':'none';
-  if(el.dataset.dim!=='custom'){document.getElementById('package_custom_dim').value='';document.getElementById('package_custom_weight').value='';}
 }
 
-// Options toggle
+// Truck selection
+let selectedTruck=null;
+document.querySelectorAll('.truck-card').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.querySelectorAll('.truck-card').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+    selectedTruck={base:parseFloat(el.dataset.base), km:parseFloat(el.dataset.km)};
+  });
+});
+
+// Options
 let selectedOptions={};
 function toggleOption(el,id){
   if(selectedOptions[id]){delete selectedOptions[id];el.classList.remove("active");}
@@ -252,19 +278,31 @@ function toggleOption(el,id){
 function calculateOrder(){
   if(!selectedCargo){alert("Выберите тип груза"); return;}
   let distance=(fromMark&&toMark)?ymaps.coordSystem.geo.getDistance(fromMark.geometry.getCoordinates(),toMark.geometry.getCoordinates())/1000:0;
-  let price=selectedCargo.basePrice;
+  let price=0;
 
-  if(selectedCargo.type==='move' && distance>30) price*=3;
-
-  if(selectedCargo.type==='package'){
-    if(selectedPackage.dim==='custom'){
-      let w=parseFloat(document.getElementById('package_custom_weight').value);
-      price=w && !isNaN(w)? w*50 : 200;
-    } else price=selectedPackage.price;
-    if(distance>0) price+=distance*10;
+  if(selectedCargo.type==='letter') price = 100 + 60 + distance*0.005;
+  else if(selectedCargo.type==='package'){
+    if(!selectedPackage){alert("Выберите коробку"); return;}
+    switch(selectedPackage.dim){
+      case '17x12x9': price = 100+50+distance*0.005; break;
+      case '23x19x10': price = 100+100+distance*0.006; break;
+      case '33x25x15': price = 300+150+distance*0.007; break;
+      case '31x25x38': price = 400+230+distance*0.008; break;
+      case '60x35x30': price = 600+270+distance*1; break;
+      case 'custom':
+        let w=parseFloat(document.getElementById('package_custom_weight').value)||0;
+        let dims=document.getElementById('package_custom_dim').value.split('x');
+        let volume = dims.length===3? dims[0]*dims[1]*dims[2]/1000:0;
+        price=100+100+volume*5 + distance*0.7; break;
+    }
   }
-
-  if(selectedCargo.type!=='package' && selectedCargo.type!=='move' && distance>0) price+=distance*10;
+  else if(selectedCargo.type==='move'){
+    price = 1500 + ((distance<=50)?distance*60:50*60 + (distance-50)*150);
+  }
+  else if(selectedCargo.type==='dedicated'){
+    if(!selectedTruck){alert("Выберите транспорт"); return;}
+    price = selectedTruck.base + distance*selectedTruck.km;
+  }
 
   if(selectedOptions['insurance']) price*=1.1;
   if(selectedOptions['secure']) price*=1.03;
@@ -280,19 +318,6 @@ function sendOrder(){
   if(!selectedCargo){alert("Выберите тип груза"); return;}
   alert("Спасибо! Ваш заказ оформлен. С вами свяжется оператор.");
 }
-</script>
-
-<!-- Tawk.to -->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/69b562ef5024d01c38daccb3/1jjm8ktpu';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
 </script>
 
 </body>
