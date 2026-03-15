@@ -5,29 +5,62 @@
 <meta charset="UTF-8">
 <title>TransCargo</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://api-maps.yandex.ru/2.1/?apikey=21a0a372-2599-476c-a069-77850517dfdb&lang=ru_RU"></script>
 
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <style>
 
+/* ======================
+   THEME VARIABLES
+====================== */
+
+:root{
+--bg:#ffffff;
+--text:#111;
+--card:#f3f3f3;
+--header:#ffffff;
+--accent:#00aaff;
+--border:#ddd;
+}
+
+.dark{
+--bg:#1f1f1f;
+--text:#ffffff;
+--card:#2a2a2a;
+--header:#111;
+--accent:#00aaff;
+--border:#444;
+}
+
+/* ======================
+   BASE
+====================== */
+
 body{
 margin:0;
 font-family:Arial;
-background:#1f1f1f;
-color:white;
+background:var(--bg);
+color:var(--text);
+transition:0.3s;
 }
 
 .container{
 width:1200px;
+max-width:95%;
 margin:auto;
 }
 
-/* HEADER */
+/* ======================
+   HEADER
+====================== */
 
 header{
-background:#111;
+background:var(--header);
 padding:15px 0;
+border-bottom:1px solid var(--border);
 }
 
 .header-inner{
@@ -46,32 +79,48 @@ gap:15px;
 height:50px;
 }
 
+nav{
+display:flex;
+align-items:center;
+}
+
 nav a{
-color:white;
+color:var(--text);
 margin-left:25px;
 text-decoration:none;
 font-weight:bold;
 }
 
-/* HERO */
+.theme-toggle{
+cursor:pointer;
+margin-right:20px;
+font-size:20px;
+}
+
+/* ======================
+   HERO
+====================== */
 
 .hero{
 display:flex;
 justify-content:space-between;
 align-items:center;
 padding:60px 0;
+gap:40px;
 }
 
 .hero-truck{
-width:500px;
+width:480px;
+max-width:100%;
 }
 
 .contact-form{
-background:#2a2a2a;
+background:var(--card);
 padding:25px;
 border-radius:10px;
 width:320px;
 text-align:center;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
 .contact-form input{
@@ -79,36 +128,52 @@ width:100%;
 padding:12px;
 margin-top:10px;
 border-radius:6px;
-border:none;
+border:1px solid var(--border);
+background:var(--bg);
+color:var(--text);
 }
 
 .contact-form button{
 margin-top:15px;
 width:100%;
 padding:12px;
-background:#00aaff;
+background:var(--accent);
 border:none;
 border-radius:6px;
 color:white;
 font-weight:bold;
 cursor:pointer;
+transition:.2s;
 }
 
-/* MAP */
+.contact-form button:hover{
+opacity:0.9;
+}
+
+/* ======================
+   MAP
+====================== */
 
 .map-section{
-padding:40px 0;
+padding:50px 0;
 }
 
 #map{
 height:420px;
 border-radius:10px;
+margin-top:20px;
 }
 
 .address-boxes{
 display:flex;
 gap:20px;
 margin-top:20px;
+flex-wrap:wrap;
+}
+
+.address-box{
+flex:1;
+min-width:250px;
 }
 
 .address-box input{
@@ -117,10 +182,10 @@ width:100%;
 padding:15px;
 
 border-radius:8px;
-border:1px solid #444;
+border:1px solid var(--border);
 
-background:#2a2a2a;
-color:white;
+background:var(--card);
+color:var(--text);
 
 font-size:16px;
 
@@ -129,27 +194,38 @@ font-size:16px;
 .calculate{
 margin-top:20px;
 padding:14px 25px;
-background:#00aaff;
+background:var(--accent);
 border:none;
 border-radius:6px;
 font-weight:bold;
 cursor:pointer;
 }
 
-/* ICONS */
+/* ======================
+   ICONS
+====================== */
 
 .icons{
 display:flex;
 justify-content:space-between;
+gap:20px;
 padding:60px 0;
 text-align:center;
+flex-wrap:wrap;
 }
 
 .icon-card{
-background:#2a2a2a;
-width:23%;
+background:var(--card);
+flex:1;
+min-width:200px;
 padding:30px;
 border-radius:10px;
+transition:0.3s;
+cursor:pointer;
+}
+
+.icon-card:hover{
+transform:translateY(-5px);
 }
 
 .material-icons{
@@ -157,34 +233,58 @@ font-size:40px;
 margin-bottom:10px;
 }
 
-/* SERVICES */
+/* ======================
+   SERVICES
+====================== */
 
 .services{
-background:#111;
+background:var(--header);
 padding:60px 0;
 }
 
 .service-list{
 display:flex;
 gap:20px;
+flex-wrap:wrap;
 }
 
 .service{
-background:#2a2a2a;
+background:var(--card);
 padding:25px;
 border-radius:10px;
 flex:1;
+min-width:200px;
 text-align:center;
+transition:0.3s;
 }
 
-/* ABOUT */
+.service:hover{
+transform:translateY(-5px);
+}
+
+/* ======================
+   ABOUT
+====================== */
 
 .about{
 padding:60px 0;
 line-height:1.6;
 }
 
-/* ANIMATION */
+/* ======================
+   FOOTER
+====================== */
+
+footer{
+background:var(--header);
+padding:25px;
+text-align:center;
+border-top:1px solid var(--border);
+}
+
+/* ======================
+   ANIMATION
+====================== */
 
 .fade{
 opacity:0;
@@ -198,7 +298,6 @@ transform:none;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -213,8 +312,13 @@ transform:none;
 </div>
 
 <nav>
+
+<span class="material-icons theme-toggle" onclick="toggleTheme()">dark_mode</span>
+
+<a href="https://t.me/transcargo_support" target="_blank">Telegram</a>
+
 <a href="order.html">Заказать</a>
-<a href="#">Личный кабинет</a>
+
 </nav>
 
 </div>
@@ -230,7 +334,7 @@ transform:none;
 
 <h3>Связаться с нами</h3>
 
-<input placeholder="Ваше имя">
+<input id="name" placeholder="Ваше имя">
 
 <input id="phone" placeholder="+7 (___) ___-__-__">
 
@@ -303,21 +407,10 @@ transform:none;
 
 <div class="service-list">
 
-<div class="service">
-Упаковка груза
-</div>
-
-<div class="service">
-Страхование
-</div>
-
-<div class="service">
-Надежная сделка
-</div>
-
-<div class="service">
-SMS уведомления
-</div>
+<div class="service">Упаковка груза</div>
+<div class="service">Страхование</div>
+<div class="service">Надежная сделка</div>
+<div class="service">SMS уведомления</div>
 
 </div>
 
@@ -348,18 +441,49 @@ TransCargo — транспортная компания, предоставля
 
 </div>
 
+<footer>
+
+© 2026 TransCargo
+
+</footer>
+
 
 <script>
 
-/* форма */
+/* THEME */
+
+function toggleTheme(){
+
+document.body.classList.toggle("dark");
+
+localStorage.setItem(
+"theme",
+document.body.classList.contains("dark") ? "dark" : "light"
+);
+
+}
+
+if(localStorage.getItem("theme")=="dark"){
+document.body.classList.add("dark");
+}
+
+/* FORM */
 
 function sendForm(){
+
+let name=document.getElementById("name").value;
+let phone=document.getElementById("phone").value;
+
+if(name=="" || phone==""){
+alert("Введите данные");
+return;
+}
 
 alert("Спасибо! С вами скоро свяжется оператор.");
 
 }
 
-/* телефон маска */
+/* PHONE MASK */
 
 document.getElementById('phone').addEventListener('input', function(e){
 
@@ -376,7 +500,7 @@ e.target.value=formatted;
 
 });
 
-/* карта */
+/* MAP */
 
 ymaps.ready(init);
 
@@ -417,7 +541,7 @@ buildRoute();
 
 }
 
-/* адрес */
+/* ADDRESS */
 
 function getAddress(coords,input){
 
@@ -431,7 +555,7 @@ document.getElementById(input).value=address;
 
 }
 
-/* ввод адреса */
+/* INPUT ADDRESS */
 
 function setPoint(input){
 
@@ -465,7 +589,7 @@ buildRoute();
 
 }
 
-/* маршрут */
+/* ROUTE */
 
 function buildRoute(){
 
@@ -489,7 +613,7 @@ map.geoObjects.add(route);
 
 }
 
-/* переход */
+/* ORDER */
 
 function goOrder(){
 
@@ -500,7 +624,7 @@ window.location="order.html";
 
 }
 
-/* анимация */
+/* ANIMATION */
 
 let blocks=document.querySelectorAll(".fade");
 
