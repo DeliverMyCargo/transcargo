@@ -317,11 +317,11 @@ function calculateOrder(){
   else if(selectedCargo.type==='package'){
     if(!selectedPackage){alert("Выберите коробку"); return;}
     switch(selectedPackage.dim){
-      case '17x12x9': price = 100+50+distance*0.5; break;
-      case '23x19x10': price = 100+100+distance*0.6; break;
-      case '33x25x15': price = 300+150+distance*0.7; break;
-      case '31x25x38': price = 400+230+distance*0.8; break;
-      case '60x35x30': price = 600+270+distance*1; break;
+      case '17x12x9': price = 100+50+distance*0.05; break;
+      case '23x19x10': price = 100+100+distance*0.06; break;
+      case '33x25x15': price = 300+150+distance*0.07; break;
+      case '31x25x38': price = 400+230+distance*0.08; break;
+      case '60x35x30': price = 600+270+distance*0,1; break;
       case 'custom': let w=parseFloat(document.getElementById('package_custom_weight').value)||0; let dims=document.getElementById('package_custom_dim').value.split('x'); let volume = dims.length===3? dims[0]*dims[1]*dims[2]/1000:0; price=100+100+volume*5 + distance*0.7; break;
     }
   } else if(selectedCargo.type==='move'){ price = 1500 + ((distance<=50)?distance*60:50*60 + (distance-50)*150); }
