@@ -313,6 +313,7 @@ function calculateOrder(){
   if(!selectedCargo){alert("Выберите тип груза"); return;}
   let distance=(fromMark&&toMark)?ymaps.coordSystem.geo.getDistance(fromMark.geometry.getCoordinates(),toMark.geometry.getCoordinates())/1000:0;
   let price=0;
+  
   if(selectedCargo.type==='letter') price = 100 + 60 + distance*0.5;
   else if(selectedCargo.type==='package'){
     if(!selectedPackage){alert("Выберите коробку"); return;}
@@ -330,6 +331,10 @@ function calculateOrder(){
   if(selectedOptions['secure']) price*=1.03;
   if(selectedOptions['sms']) price+=20;
   document.getElementById('summary').innerHTML="<b>Стоимость:</b> "+Math.round(price)+"₽";
+  if(selectedCargo.type==='letter') {
+    price = 100 + 60 + distance*50; // базовая + километраж
+    if(price > 300) price = 300;   // ограничение для письма
+}
 }
 
 // Send order
