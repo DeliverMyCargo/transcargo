@@ -26,18 +26,19 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 .theme-toggle{cursor:pointer;margin-right:20px;font-size:20px;}
 .hero{display:flex;flex-direction:column;gap:30px;padding:40px 0;}
 .contact-form{background:var(--card);padding:25px;border-radius:10px;width:100%;max-width:1400px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
-.contact-form input, .contact-form select{width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);}
-.contact-form button{margin-top:15px;width:100%;padding:12px;background:var(--accent);border:none;border-radius:6px;color:white;font-weight:bold;cursor:pointer;transition:.2s;}
-.contact-form button:hover{opacity:0.9;}
+.contact-form input{width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);}
+.select-cargo{display:flex;gap:20px;margin-top:15px;}
+.cargo-card{flex:1;min-width:150px;text-align:center;padding:15px;border-radius:10px;background:var(--card);cursor:pointer;transition:.2s; border:2px solid transparent;}
+.cargo-card img{width:50px; height:50px;}
+.cargo-card.active{border-color:var(--accent); background:var(--accent); color:#fff;}
+.size-weight{margin-top:10px; display:none;}
+.size-weight input{width:100%;padding:8px;margin-top:5px;border-radius:5px;border:1px solid var(--border);}
+.calculate{margin-top:20px;padding:14px 25px;background:var(--accent);border:none;border-radius:6px;font-weight:bold;cursor:pointer;}
+.summary{margin-top:20px;padding:20px;background:var(--card);border-radius:10px;}
 #map{height:500px;border-radius:10px;margin-top:15px;}
-.address-boxes{display:flex;gap:20px;margin-top:20px;flex-wrap:wrap;}
-.address-box{flex:1;min-width:250px;}
 .options{margin-top:20px;display:flex;flex-direction:column;gap:15px;}
 .option{padding:12px;border-radius:8px;background:var(--card);cursor:pointer;transition:.2s;font-weight:normal;}
 .option.active{font-weight:bold;background:var(--accent);color:#fff;}
-.size-select{margin-top:10px;}
-.calculate{margin-top:20px;padding:14px 25px;background:var(--accent);border:none;border-radius:6px;font-weight:bold;cursor:pointer;}
-.summary{margin-top:20px;padding:20px;background:var(--card);border-radius:10px;}
 </style>
 </head>
 <body>
@@ -73,28 +74,31 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 <input id="receiver_email" placeholder="Email">
 
 <h3>Адреса</h3>
-<div class="address-boxes">
-  <div class="address-box"><input id="from" placeholder="Откуда" onchange="setPoint('from')"></div>
-  <div class="address-box"><input id="to" placeholder="Куда" onchange="setPoint('to')"></div>
-</div>
+<input id="from" placeholder="Откуда" onchange="setPoint('from')">
+<input id="to" placeholder="Куда" onchange="setPoint('to')">
+
 <div id="map"></div>
 
 <h3>Что перевозим</h3>
-<select id="cargo_type">
-  <option value="letter">Письмо</option>
-  <option value="package">Посылка</option>
-  <option value="things">Вещи</option>
-  <option value="dedicated">Выделенный транспорт</option>
-</select>
+<div class="select-cargo">
+  <div class="cargo-card" data-type="letter" data-price="90" onclick="selectCargo(this)">
+    <img src="icons/letter.png"><br>Письмо<br>от 90₽
+  </div>
+  <div class="cargo-card" data-type="package" data-price="200" onclick="selectCargo(this)">
+    <img src="icons/package.png"><br>Посылка<br>от 200₽
+  </div>
+  <div class="cargo-card" data-type="things" data-price="2000" onclick="selectCargo(this)">
+    <img src="icons/things.png"><br>Переезд<br>от 2000₽
+  </div>
+  <div class="cargo-card" data-type="dedicated" data-price="30000" onclick="selectCargo(this)">
+    <img src="icons/truck.png"><br>Выделенный транспорт<br>от 30000₽
+  </div>
+</div>
 
-<div id="size_options" class="size-select">
-<h4>Размер посылки:</h4>
-<select id="package_size">
-  <option value="S">S: до 30x20x15 см</option>
-  <option value="M">M: до 50x40x30 см</option>
-  <option value="L">L: до 80x60x50 см</option>
-  <option value="XL">XL: до 120x80x70 см</option>
-</select>
+<div class="size-weight" id="size-weight">
+<h4>Размер посылки и вес</h4>
+<input id="package_size" placeholder="Размер (например 50x40x30 см)">
+<input id="package_weight" placeholder="Вес (кг)">
 </div>
 
 <h3>Дополнительные услуги</h3>
@@ -126,10 +130,6 @@ function toggleTheme(){
 }
 if(localStorage.getItem("theme")=="dark"){document.body.classList.add("dark");}
 
-// Load saved addresses from index
-if(localStorage.getItem('from')) document.getElementById('from').value = localStorage.getItem('from');
-if(localStorage.getItem('to')) document.getElementById('to').value = localStorage.getItem('to');
-
 // Phone mask
 ['sender_phone','receiver_phone'].forEach(id=>{
   document.getElementById(id).addEventListener('input', function(e){
@@ -148,9 +148,6 @@ ymaps.ready(init);
 let map,fromMark,toMark,route;
 function init(){
   map=new ymaps.Map("map",{center:[55.75,37.61],zoom:5});
-  // restore markers from localStorage
-  if(document.getElementById('from').value) setPoint('from');
-  if(document.getElementById('to').value) setPoint('to');
   map.events.add('click',function(e){
     let coords=e.get('coords');
     if(!fromMark){
@@ -170,7 +167,6 @@ function getAddress(coords,input){
   ymaps.geocode(coords).then(function(res){
     let address=res.geoObjects.get(0).getAddressLine();
     document.getElementById(input).value = address;
-    localStorage.setItem(input,address);
   });
 }
 function setPoint(input){
@@ -192,6 +188,15 @@ function buildRoute(){
   }
 }
 
+// Cargo selection
+let selectedCargo = null;
+function selectCargo(el){
+  document.querySelectorAll('.cargo-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  selectedCargo = {type:el.dataset.type, basePrice:parseInt(el.dataset.price)};
+  document.getElementById('size-weight').style.display = (selectedCargo.type==='package') ? 'block' : 'none';
+}
+
 // Options toggle
 let selectedOptions={};
 function toggleOption(el,id){
@@ -201,9 +206,9 @@ function toggleOption(el,id){
 
 // Calculate order
 function calculateOrder(){
-  let basePrice = 500;
+  if(!selectedCargo){alert("Выберите тип груза"); return;}
   let distance = fromMark && toMark ? ymaps.coordSystem.geo.getDistance(fromMark.geometry.getCoordinates(),toMark.geometry.getCoordinates())/1000 : 0;
-  let price = basePrice + distance*10;
+  let price = selectedCargo.basePrice + distance*10;
   if(selectedOptions['insurance']) price*=1.1;
   if(selectedOptions['secure']) price*=1.03;
   if(selectedOptions['sms']) price+=20;
@@ -216,29 +221,9 @@ function sendOrder(){
   for(let f of fields){
     if(!document.getElementById(f).value){alert("Пожалуйста, заполните все поля");return;}
   }
+  if(!selectedCargo){alert("Выберите тип груза"); return;}
   alert("Спасибо! Ваш заказ оформлен. С вами свяжется оператор.");
 }
-
-// Show/hide package size
-document.getElementById('cargo_type').addEventListener('change',function(){
-  if(this.value==='package') document.getElementById('size_options').style.display='block';
-  else document.getElementById('size_options').style.display='none';
-});
-if(document.getElementById('cargo_type').value!=='package') document.getElementById('size_options').style.display='none';
-
-</script>
-
-<!-- Tawk.to -->
-<script>
-var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/69b562ef5024d01c38daccb3/1jjm8ktpu';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
 </script>
 
 </body>
