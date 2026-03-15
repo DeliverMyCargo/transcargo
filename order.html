@@ -13,7 +13,7 @@
 --bg:#ffffff; --text:#111; --card:#f3f3f3; --header:#ffffff; --accent:#00aaff; --border:#ddd;
 }
 .dark{
---bg:#1f1f1f; --text:#ffffff; --card:#2a2a2a; --header:#111; --accent:#00aaff; --border:#444;
+--bg:#1f1f1f; --text:#fff; --card:#2a2a2a; --header:#111; --accent:#00aaff; --border:#444;
 }
 body{margin:0;font-family:Arial;background:var(--bg);color:var(--text);transition:0.3s;}
 .container{width:1400px;max-width:95%;margin:auto;}
@@ -27,18 +27,18 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 .hero{display:flex;flex-direction:column;gap:30px;padding:40px 0;}
 .contact-form{background:var(--card);padding:25px;border-radius:10px;width:100%;max-width:1400px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
 .contact-form input{width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);}
-.select-cargo{display:flex;gap:20px;margin-top:15px;}
-.cargo-card{flex:1;min-width:150px;text-align:center;padding:15px;border-radius:10px;background:var(--card);cursor:pointer;transition:.2s; border:2px solid transparent;}
-.cargo-card img{width:50px; height:50px;}
+.select-cargo{display:flex;gap:20px;margin-top:15px;flex-wrap:wrap;}
+.cargo-card{flex:1;min-width:120px;text-align:center;padding:15px;border-radius:10px;background:var(--card);cursor:pointer;transition:.2s;border:2px solid transparent;}
+.cargo-card img{width:50px;height:50px;margin-bottom:5px;}
 .cargo-card.active{border-color:var(--accent); background:var(--accent); color:#fff;}
-.size-weight{margin-top:10px; display:none;}
-.size-weight input{width:100%;padding:8px;margin-top:5px;border-radius:5px;border:1px solid var(--border);}
+.size-weight, .truck-type{margin-top:15px; display:none;}
+.size-weight input, .truck-type select{width:100%;padding:8px;margin-top:5px;border-radius:5px;border:1px solid var(--border);}
 .calculate{margin-top:20px;padding:14px 25px;background:var(--accent);border:none;border-radius:6px;font-weight:bold;cursor:pointer;}
 .summary{margin-top:20px;padding:20px;background:var(--card);border-radius:10px;}
-#map{height:500px;border-radius:10px;margin-top:15px;}
 .options{margin-top:20px;display:flex;flex-direction:column;gap:15px;}
 .option{padding:12px;border-radius:8px;background:var(--card);cursor:pointer;transition:.2s;font-weight:normal;}
 .option.active{font-weight:bold;background:var(--accent);color:#fff;}
+#map{height:500px;border-radius:10px;margin-top:15px;}
 </style>
 </head>
 <body>
@@ -74,9 +74,10 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 <input id="receiver_email" placeholder="Email">
 
 <h3>Адреса</h3>
-<input id="from" placeholder="Откуда" onchange="setPoint('from')">
-<input id="to" placeholder="Куда" onchange="setPoint('to')">
-
+<div class="address-boxes">
+  <div class="address-box"><input id="from" placeholder="Откуда" onchange="setPoint('from')"></div>
+  <div class="address-box"><input id="to" placeholder="Куда" onchange="setPoint('to')"></div>
+</div>
 <div id="map"></div>
 
 <h3>Что перевозим</h3>
@@ -87,8 +88,8 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
   <div class="cargo-card" data-type="package" data-price="200" onclick="selectCargo(this)">
     <img src="icons/package.png"><br>Посылка<br>от 200₽
   </div>
-  <div class="cargo-card" data-type="things" data-price="2000" onclick="selectCargo(this)">
-    <img src="icons/things.png"><br>Переезд<br>от 2000₽
+  <div class="cargo-card" data-type="move" data-price="2000" onclick="selectCargo(this)">
+    <img src="icons/move.png"><br>Переезд<br>от 2000₽
   </div>
   <div class="cargo-card" data-type="dedicated" data-price="30000" onclick="selectCargo(this)">
     <img src="icons/truck.png"><br>Выделенный транспорт<br>от 30000₽
@@ -101,6 +102,15 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 <input id="package_weight" placeholder="Вес (кг)">
 </div>
 
+<div class="truck-type" id="truck-type">
+<h4>Тип кузова для выделенного транспорта</h4>
+<select id="truck_body">
+  <option value="box">Фургон</option>
+  <option value="flat">Платформа</option>
+  <option value="refrigerator">Рефрижератор</option>
+</select>
+</div>
+
 <h3>Дополнительные услуги</h3>
 <div class="options">
   <div class="option" onclick="toggleOption(this,'insurance')">Страховка (10%)</div>
@@ -110,9 +120,7 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 </div>
 
 <button class="calculate" onclick="calculateOrder()">Рассчитать стоимость</button>
-
 <div class="summary" id="summary"><b>Стоимость:</b> 0₽</div>
-
 <button class="calculate" onclick="sendOrder()">Оформить заказ</button>
 
 </div>
@@ -148,6 +156,8 @@ ymaps.ready(init);
 let map,fromMark,toMark,route;
 function init(){
   map=new ymaps.Map("map",{center:[55.75,37.61],zoom:5});
+  if(document.getElementById('from').value) setPoint('from');
+  if(document.getElementById('to').value) setPoint('to');
   map.events.add('click',function(e){
     let coords=e.get('coords');
     if(!fromMark){
@@ -167,6 +177,7 @@ function getAddress(coords,input){
   ymaps.geocode(coords).then(function(res){
     let address=res.geoObjects.get(0).getAddressLine();
     document.getElementById(input).value = address;
+    localStorage.setItem(input,address);
   });
 }
 function setPoint(input){
@@ -195,6 +206,7 @@ function selectCargo(el){
   el.classList.add('active');
   selectedCargo = {type:el.dataset.type, basePrice:parseInt(el.dataset.price)};
   document.getElementById('size-weight').style.display = (selectedCargo.type==='package') ? 'block' : 'none';
+  document.getElementById('truck-type').style.display = (selectedCargo.type==='dedicated') ? 'block' : 'none';
 }
 
 // Options toggle
@@ -224,6 +236,19 @@ function sendOrder(){
   if(!selectedCargo){alert("Выберите тип груза"); return;}
   alert("Спасибо! Ваш заказ оформлен. С вами свяжется оператор.");
 }
+</script>
+
+<!-- Tawk.to -->
+<script>
+var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/69b562ef5024d01c38daccb3/1jjm8ktpu';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
 </script>
 
 </body>
