@@ -4,10 +4,8 @@
 <meta charset="UTF-8">
 <title>TransCargo — Заказ</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://api-maps.yandex.ru/2.1/?apikey=21a0a372-2599-476c-a069-77850517dfdb&lang=ru_RU"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
 <style>
 :root{
 --bg:#ffffff; --text:#111; --card:#f3f3f3; --header:#ffffff; --accent:#00aaff; --border:#ddd;
@@ -32,7 +30,7 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 .cargo-card img{width:50px;height:50px;margin-bottom:5px;}
 .cargo-card.active{border-color:var(--accent); background:var(--accent); color:#fff;}
 .size-weight, .truck-type{margin-top:15px; display:none;}
-.size-weight input, .truck-type select{width:100%;padding:8px;margin-top:5px;border-radius:5px;border:1px solid var(--border);}
+.size-weight input, .size-weight select, .truck-type select{width:100%;padding:8px;margin-top:5px;border-radius:5px;border:1px solid var(--border);}
 .calculate{margin-top:20px;padding:14px 25px;background:var(--accent);border:none;border-radius:6px;font-weight:bold;cursor:pointer;}
 .summary{margin-top:20px;padding:20px;background:var(--card);border-radius:10px;}
 .options{margin-top:20px;display:flex;flex-direction:column;gap:15px;}
@@ -97,18 +95,24 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 </div>
 
 <div class="size-weight" id="size-weight">
-<h4>Размер посылки и вес</h4>
-<input id="package_size" placeholder="Размер (например 50x40x30 см)">
-<input id="package_weight" placeholder="Вес (кг)">
+  <h4>Выберите размер коробки</h4>
+  <select id="package_size">
+    <option value="XS" data-dim="17x12x9" data-weight="0.5" data-price="150">XS: 17x12x9 см, до 0,5 кг</option>
+    <option value="S" data-dim="23x19x10" data-weight="2" data-price="200">S: 23x19x10 см, до 2 кг</option>
+    <option value="M" data-dim="33x25x15" data-weight="5" data-price="250">M: 33x25x15 см, до 5 кг</option>
+    <option value="L" data-dim="31x25x38" data-weight="12" data-price="300">L: 31x25x38 см, до 12 кг</option>
+    <option value="XL" data-dim="60x35x30" data-weight="18" data-price="400">XL: 60x35x30 см, до 18 кг</option>
+  </select>
+  <input id="package_weight" placeholder="Вес (кг)">
 </div>
 
 <div class="truck-type" id="truck-type">
-<h4>Тип кузова для выделенного транспорта</h4>
-<select id="truck_body">
-  <option value="box">Фургон</option>
-  <option value="flat">Платформа</option>
-  <option value="refrigerator">Рефрижератор</option>
-</select>
+  <h4>Тип кузова для выделенного транспорта</h4>
+  <select id="truck_body">
+    <option value="box">Фургон</option>
+    <option value="flat">Платформа</option>
+    <option value="refrigerator">Рефрижератор</option>
+  </select>
 </div>
 
 <h3>Дополнительные услуги</h3>
@@ -156,8 +160,13 @@ ymaps.ready(init);
 let map,fromMark,toMark,route;
 function init(){
   map=new ymaps.Map("map",{center:[55.75,37.61],zoom:5});
-  if(document.getElementById('from').value) setPoint('from');
-  if(document.getElementById('to').value) setPoint('to');
+  
+  // автоперенос координат
+  let savedFrom = localStorage.getItem('from');
+  let savedTo = localStorage.getItem('to');
+  if(savedFrom) {document.getElementById('from').value=savedFrom; setPoint('from');}
+  if(savedTo) {document.getElementById('to').value=savedTo; setPoint('to');}
+
   map.events.add('click',function(e){
     let coords=e.get('coords');
     if(!fromMark){
@@ -205,6 +214,7 @@ function selectCargo(el){
   document.querySelectorAll('.cargo-card').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   selectedCargo = {type:el.dataset.type, basePrice:parseInt(el.dataset.price)};
+  
   document.getElementById('size-weight').style.display = (selectedCargo.type==='package') ? 'block' : 'none';
   document.getElementById('truck-type').style.display = (selectedCargo.type==='dedicated') ? 'block' : 'none';
 }
@@ -220,19 +230,36 @@ function toggleOption(el,id){
 function calculateOrder(){
   if(!selectedCargo){alert("Выберите тип груза"); return;}
   let distance = fromMark && toMark ? ymaps.coordSystem.geo.getDistance(fromMark.geometry.getCoordinates(),toMark.geometry.getCoordinates())/1000 : 0;
-  let price = selectedCargo.basePrice + distance*10;
-  if(selectedOptions['insurance']) price*=1.1;
-  if(selectedOptions['secure']) price*=1.03;
-  if(selectedOptions['sms']) price+=20;
+  let price = selectedCargo.basePrice;
+
+  // Переезд
+  if(selectedCargo.type==='move'){
+    if(distance>30){price *= 3;} // за пределы города +200%
+  }
+
+  // Посылка
+  if(selectedCargo.type==='package'){
+    let sel = document.getElementById('package_size');
+    price = parseInt(sel.options[sel.selectedIndex].dataset.price);
+    let weight = parseFloat(document.getElementById('package_weight').value);
+    if(weight && !isNaN(weight)) price += weight*10;
+  }
+
+  // Расстояние добавляем для всех кроме переезда
+  if(distance>0 && selectedCargo.type!=='move') price += distance*10;
+
+  // Опции
+  if(selectedOptions['insurance']) price *= 1.1;
+  if(selectedOptions['secure']) price *= 1.03;
+  if(selectedOptions['sms']) price += 20;
+
   document.getElementById('summary').innerHTML="<b>Стоимость:</b> "+Math.round(price)+"₽";
 }
 
 // Send order
 function sendOrder(){
   let fields=['sender_name','sender_phone','sender_email','receiver_name','receiver_phone','receiver_email','from','to'];
-  for(let f of fields){
-    if(!document.getElementById(f).value){alert("Пожалуйста, заполните все поля");return;}
-  }
+  for(let f of fields){if(!document.getElementById(f).value){alert("Пожалуйста, заполните все поля");return;}}
   if(!selectedCargo){alert("Выберите тип груза"); return;}
   alert("Спасибо! Ваш заказ оформлен. С вами свяжется оператор.");
 }
