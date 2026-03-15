@@ -127,7 +127,7 @@ h5{margin-top:20px; margin-bottom:10px;}
     </div>
   </div>
 
-  <div class="custom-package" id="custom-package" style="display:none;">
+  <div class="custom-package" id="custom-package">
     <input id="custom_length" placeholder="Длина (см)">
     <input id="custom_width" placeholder="Ширина (см)">
     <input id="custom_height" placeholder="Высота (см)">
@@ -136,7 +136,6 @@ h5{margin-top:20px; margin-bottom:10px;}
 </div>
 
 <div class="truck-type" id="truck-type">
-  <div class="truck-type" id="truck-type">
   <h4>Выберите транспорт</h4>
 
   <h5>Кузов</h5>
@@ -186,7 +185,6 @@ h5{margin-top:20px; margin-bottom:10px;}
       <div class="hover-info"></div>
     </div>
   </div>
-</div>
 </div>
 
 <h3>Дополнительные услуги</h3>
@@ -356,14 +354,11 @@ function calculateOrder(){
 // Send order
 function sendOrder(){
   let fields=['sender_name','sender_phone','sender_email','receiver_name','receiver_phone','receiver_email','from','to'];
-  for(let f of fields){if(!document.getElementById(f).value){alert("Пожалуйста, заполните все поля");return;}}
+  for(let f of fields){if(!document.getElementById(f).value){alert("Пожалуйста, заполните все поля");return;} }
   if(!selectedCargo){alert("Выберите тип груза"); return;}
   alert("Спасибо! Ваш заказ оформлен. С вами свяжется оператор.");
 }
 </script>
-  
 <!-- Tawk.to --> <script type="text/javascript"> var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date(); (function(){ var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0]; s1.async=true; s1.src='https://embed.tawk.to/69b562ef5024d01c38daccb3/1jjm8ktpu'; s1.charset='UTF-8'; s1.setAttribute('crossorigin','*'); s0.parentNode.insertBefore(s1,s0); })(); </script>
-  
-
 </body>
 </html>
