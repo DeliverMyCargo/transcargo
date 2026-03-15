@@ -319,6 +319,8 @@ transform:none;
 
 <a href="order.html">Заказать</a>
 
+<a href="login.html">Личный кабинет</a>
+
 </nav>
 
 </div>
@@ -471,11 +473,18 @@ document.body.classList.add("dark");
 
 function sendForm(){
 
-let name=document.getElementById("name").value;
-let phone=document.getElementById("phone").value;
+let name=document.getElementById("name").value.trim();
+let phone=document.getElementById("phone").value.trim();
 
-if(name=="" || phone==""){
-alert("Введите данные");
+if(name==""){
+alert("Введите имя");
+return;
+}
+
+let phonePattern=/^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/;
+
+if(!phonePattern.test(phone)){
+alert("Введите полный номер телефона");
 return;
 }
 
@@ -541,8 +550,6 @@ buildRoute();
 
 }
 
-/* ADDRESS */
-
 function getAddress(coords,input){
 
 ymaps.geocode(coords).then(function(res){
@@ -554,8 +561,6 @@ document.getElementById(input).value=address;
 });
 
 }
-
-/* INPUT ADDRESS */
 
 function setPoint(input){
 
@@ -589,8 +594,6 @@ buildRoute();
 
 }
 
-/* ROUTE */
-
 function buildRoute(){
 
 if(fromMark && toMark){
@@ -612,8 +615,6 @@ map.geoObjects.add(route);
 }
 
 }
-
-/* ORDER */
 
 function goOrder(){
 
