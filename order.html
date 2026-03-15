@@ -59,7 +59,6 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 
 <div class="container hero">
 <h2>Оформить заказ</h2>
-
 <div class="contact-form">
 
 <h3>Данные отправителя</h3>
@@ -82,16 +81,16 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
 <h3>Что перевозим</h3>
 <div class="select-cargo">
   <div class="cargo-card" data-type="letter" data-price="90" onclick="selectCargo(this)">
-    <img src="letter.svg"><br>Письмо<br>от 90₽
+    <img src="letter.png"><br>Письмо<br>от 90₽
   </div>
   <div class="cargo-card" data-type="package" data-price="200" onclick="selectCargo(this)">
-    <img src="package.svg"><br>Посылка<br>от 200₽
+    <img src="package.png"><br>Посылка<br>от 200₽
   </div>
   <div class="cargo-card" data-type="move" data-price="2000" onclick="selectCargo(this)">
-    <img src="move.svg"><br>Переезд<br>от 2000₽
+    <img src="move.png"><br>Переезд<br>от 2000₽
   </div>
   <div class="cargo-card" data-type="dedicated" data-price="30000" onclick="selectCargo(this)">
-    <img src="truck.svg"><br>Выделенный транспорт<br>от 30000₽
+    <img src="truck.png"><br>Выделенный транспорт<br>от 30000₽
   </div>
 </div>
 
@@ -99,22 +98,22 @@ nav a{color:var(--text);margin-left:25px;text-decoration:none;font-weight:bold;}
   <h4>Выберите размер коробки</h4>
   <div class="select-package" id="select-package">
     <div class="package-card" data-dim="17x12x9" data-weight="0.5" data-price="150" onclick="selectPackage(this)">
-      <img src="package-xs.svg"><br>XS<br>0,5 кг
+      <img src="packagexs.svg"><br>XS<br>0,5 кг
     </div>
     <div class="package-card" data-dim="23x19x10" data-weight="2" data-price="200" onclick="selectPackage(this)">
-      <img src="package-s.svg"><br>S<br>2 кг
+      <img src="packages.svg"><br>S<br>2 кг
     </div>
     <div class="package-card" data-dim="33x25x15" data-weight="5" data-price="250" onclick="selectPackage(this)">
-      <img src="package-m.svg"><br>M<br>5 кг
+      <img src="packagem.svg"><br>M<br>5 кг
     </div>
     <div class="package-card" data-dim="31x25x38" data-weight="12" data-price="300" onclick="selectPackage(this)">
-      <img src="package-l.svg"><br>L<br>12 кг
+      <img src="packagel.svg"><br>L<br>12 кг
     </div>
     <div class="package-card" data-dim="60x35x30" data-weight="18" data-price="400" onclick="selectPackage(this)">
-      <img src="package-xl.svg"><br>XL<br>18 кг
+      <img src="packagexl.svg"><br>XL<br>18 кг
     </div>
     <div class="package-card" data-dim="custom" data-weight="0" data-price="0" onclick="selectPackage(this)">
-      <img src="package-custom.svg"><br>Свой размер
+      <img src="fura.jpg"><br>Свой размер
     </div>
   </div>
   <div class="custom-package" id="custom-package" style="display:none;">
@@ -281,6 +280,19 @@ function sendOrder(){
   if(!selectedCargo){alert("Выберите тип груза"); return;}
   alert("Спасибо! Ваш заказ оформлен. С вами свяжется оператор.");
 }
+</script>
+
+<!-- Tawk.to -->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/69b562ef5024d01c38daccb3/1jjm8ktpu';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
 </script>
 
 </body>
