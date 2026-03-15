@@ -308,13 +308,15 @@ function toggleOption(el,id){
   else{selectedOptions[id]=true;el.classList.add("active");}
 }
 
-// Calculate order
 function calculateOrder(){
   if(!selectedCargo){alert("Выберите тип груза"); return;}
   let distance=(fromMark&&toMark)?ymaps.coordSystem.geo.getDistance(fromMark.geometry.getCoordinates(),toMark.geometry.getCoordinates())/1000:0;
   let price=0;
   
-  if(selectedCargo.type==='letter') price = 100 + 60 + distance*0.5;
+  if(selectedCargo.type==='letter') {
+    price = 100 + 60 + distance*50; // базовая + километраж
+    if(price > 300) price = 300;   // ограничение для письма
+  }
   else if(selectedCargo.type==='package'){
     if(!selectedPackage){alert("Выберите коробку"); return;}
     switch(selectedPackage.dim){
@@ -322,19 +324,28 @@ function calculateOrder(){
       case '23x19x10': price = 100+100+distance*0.06; break;
       case '33x25x15': price = 300+150+distance*0.07; break;
       case '31x25x38': price = 400+230+distance*0.08; break;
-      case '60x35x30': price = 600+270+distance*0,1; break;
-      case 'custom': let w=parseFloat(document.getElementById('package_custom_weight').value)||0; let dims=document.getElementById('package_custom_dim').value.split('x'); let volume = dims.length===3? dims[0]*dims[1]*dims[2]/1000:0; price=100+100+volume*5 + distance*0.7; break;
+      case '60x35x30': price = 600+270+distance*0.1; break;
+      case 'custom': 
+        let w=parseFloat(document.getElementById('package_custom_weight').value)||0;
+        let dims=document.getElementById('package_custom_dim').value.split('x'); 
+        let volume = dims.length===3? dims[0]*dims[1]*dims[2]/1000:0; 
+        price=100+100+volume*5 + distance*0.7; 
+        break;
     }
-  } else if(selectedCargo.type==='move'){ price = 1500 + ((distance<=50)?distance*60:50*60 + (distance-50)*150); }
-  else if(selectedCargo.type==='dedicated'){ if(!selectedTruck){alert("Выберите транспорт"); return;} price = selectedTruck.base + distance*selectedTruck.km; }
+  } 
+  else if(selectedCargo.type==='move'){ 
+    price = 1500 + ((distance<=50)?distance*60:50*60 + (distance-50)*150); 
+  }
+  else if(selectedCargo.type==='dedicated'){ 
+    if(!selectedTruck){alert("Выберите транспорт"); return;} 
+    price = selectedTruck.base + distance*selectedTruck.km; 
+  }
+
   if(selectedOptions['insurance']) price*=1.1;
   if(selectedOptions['secure']) price*=1.03;
   if(selectedOptions['sms']) price+=20;
+
   document.getElementById('summary').innerHTML="<b>Стоимость:</b> "+Math.round(price)+"₽";
-  if(selectedCargo.type==='letter') {
-    price = 100 + 60 + distance*50; // базовая + километраж
-    if(price > 300) price = 300;   // ограничение для письма
-}
 }
 
 // Send order
