@@ -1090,8 +1090,11 @@ window.handleRegister = async function() {
     registerBtn.textContent = 'Регистрация...';
     
     try {
-        // Используем телефон как email для Supabase
-        const email = `${cleanPhone}@phone.transcargo.ru`;
+        // 🔥 ВАЖНО: Создаем валидный email, используя телефон как локальную часть
+        // Используем существующий домен gmail.com (это просто пример, можно любой)
+        const email = `${cleanPhone}@furtherwind.ru`; // или можно использовать ваш реальный домен
+        
+        console.log('Регистрация с email:', email);
         
         // 1. Регистрируем пользователя
         const { data, error } = await window.supabaseClient.auth.signUp({
@@ -1107,18 +1110,26 @@ window.handleRegister = async function() {
         
         if (error) throw error;
         
-        // 2. Создаем профиль
-        if (data.user) {
+        console.log('Пользователь создан:', data);
+        
+        // 2. Профиль создастся автоматически через триггер в БД
+        // Но на всякий случай пробуем создать вручную
+        try {
             const { error: profileError } = await window.supabaseClient
                 .from('profiles')
                 .upsert({
                     id: data.user.id,
                     full_name: name,
                     phone: formatPhone(cleanPhone),
+                    email: email,
                     updated_at: new Date()
                 });
             
-            if (profileError) console.error('Ошибка создания профиля:', profileError);
+            if (profileError) {
+                console.log('Ошибка создания профиля (может уже создан триггером):', profileError);
+            }
+        } catch (profileErr) {
+            console.log('Профиль уже существует или создан триггером');
         }
         
         // 3. Генерируем и сохраняем код подтверждения
@@ -1142,7 +1153,8 @@ window.handleRegister = async function() {
         successDiv.innerHTML = `
             ✅ Регистрация успешна!<br>
             📱 Ваш код: <strong>${code}</strong><br>
-            🤖 Отправьте этот код боту @FurtherWindBot
+            🤖 Отправьте этот код боту @FurtherWindBot<br>
+            <small>Email для входа: ${email}</small>
         `;
         
         // Очищаем форму
@@ -1153,12 +1165,8 @@ window.handleRegister = async function() {
         document.getElementById('strengthBar').className = 'strength-bar';
         document.getElementById('strengthText').textContent = '';
         
-        // Переключаем на вкладку входа через 5 секунд
-        setTimeout(() => {
-            window.switchAuthTab('login');
-        }, 5000);
-        
     } catch (error) {
+        console.error('Ошибка регистрации:', error);
         errorDiv.textContent = error.message;
     } finally {
         registerBtn.disabled = false;
