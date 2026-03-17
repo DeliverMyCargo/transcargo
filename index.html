@@ -157,6 +157,10 @@
             font-size: 16px;
         }
 
+        .contact-form input:focus {
+            outline: 2px solid var(--accent);
+        }
+
         .contact-form button {
             margin-top: 15px;
             width: 100%;
@@ -228,6 +232,7 @@
             color: #999;
             font-size: 18px;
             display: none;
+            z-index: 2;
         }
 
         .clear-point:hover {
@@ -253,6 +258,11 @@
 
         .calculate:hover {
             opacity: 0.9;
+        }
+
+        .calculate.secondary {
+            background: #666;
+            margin-left: 10px;
         }
 
         /* ======================
@@ -347,6 +357,13 @@
             padding: 25px;
             border-radius: 10px;
             text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .warehouse:hover {
+            border-left: 4px solid var(--accent);
+            transform: translateX(5px);
         }
 
         .warehouse h3 {
@@ -443,6 +460,11 @@
             .header-inner {
                 flex-direction: column;
             }
+            
+            .calculate.secondary {
+                margin-left: 0;
+                margin-top: 10px;
+            }
         }
     </style>
 </head>
@@ -499,7 +521,7 @@
     </div>
     
     <button class="calculate" onclick="goOrder()">Рассчитать стоимость</button>
-    <button class="calculate" onclick="clearAllPoints()" style="background: #666; margin-left: 10px;">Очистить всё</button>
+    <button class="calculate secondary" onclick="clearAllPoints()">Очистить всё</button>
 </div>
 
 <div class="container warehouses fade">
@@ -649,14 +671,57 @@ window.addEventListener("scroll", checkFade);
 checkFade();
 
 /* ======================
+   МАСКА ДЛЯ ТЕЛЕФОНА (НОВАЯ)
+====================== */
+function phoneMask(phone) {
+    // Убираем всё кроме цифр
+    let x = phone.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+    
+    if (!x[2] && x[1] !== '') {
+        // Если первая цифра не 7 или 8, добавляем 7
+        if (x[1] !== '7' && x[1] !== '8') {
+            phone.value = '+7 (' + x[1];
+        } else {
+            phone.value = '+7 (' + x[2];
+        }
+    } else {
+        // Форматируем номер
+        let formatted = '+7 ';
+        if (x[1]) formatted += '(' + x[2];
+        if (x[3]) formatted += ') ' + x[3];
+        if (x[4]) formatted += '-' + x[4];
+        if (x[5]) formatted += '-' + x[5];
+        
+        phone.value = formatted;
+    }
+}
+
+// Вешаем маску на поле телефона
+document.addEventListener('DOMContentLoaded', function() {
+    let phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            phoneMask(this);
+        });
+        
+        // Устанавливаем курсор в конец
+        phoneInput.addEventListener('click', function() {
+            if (this.value === '') {
+                this.value = '+7 (';
+            }
+        });
+    }
+});
+
+/* ======================
    ФОРМА ОБРАТНОЙ СВЯЗИ
 ====================== */
 function sendForm() {
     let name = document.getElementById("name")?.value || '';
     let phone = document.getElementById("phone")?.value || '';
     
-    if (!name || !phone) {
-        alert("Пожалуйста, заполните имя и телефон");
+    if (!name || !phone || phone.length < 18) { // +7 (999) 999-99-99 это 18 символов
+        alert("Пожалуйста, заполните имя и корректный номер телефона");
         return;
     }
     
@@ -686,10 +751,9 @@ function goService(type) {
 }
 
 /* ======================
-   КАРТА (ПОЛНОСТЬЮ ИСПРАВЛЕННАЯ)
+   КАРТА
 ====================== */
 let map, fromMark, toMark, route;
-let isSettingFrom = true; // Сначала ставим точку "Откуда"
 
 ymaps.ready(initMap);
 
@@ -701,18 +765,14 @@ function initMap() {
             controls: ['zoomControl', 'fullscreenControl', 'geolocationControl']
         });
         
-        // Клик по карте
         map.events.add('click', function(e) {
             let coords = e.get('coords');
             
             if (!fromMark) {
-                // Ставим точку "Откуда"
                 createPlacemark('from', coords);
             } else if (!toMark) {
-                // Ставим точку "Куда"
                 createPlacemark('to', coords);
             } else {
-                // Если обе точки есть, спрашиваем что делать
                 if (confirm('Обе точки уже установлены. Очистить всё и поставить новую точку отправления?')) {
                     clearAllPoints();
                     createPlacemark('from', coords);
@@ -727,7 +787,6 @@ function initMap() {
     }
 }
 
-// Создание метки
 function createPlacemark(type, coords) {
     let options = {
         draggable: true,
@@ -741,29 +800,24 @@ function createPlacemark(type, coords) {
         balloonContent: hint
     }, options);
     
-    // Если это точка "Куда", удаляем старую
     if (type === 'to' && toMark) {
         map.geoObjects.remove(toMark);
     }
     
-    // Добавляем на карту
     map.geoObjects.add(placemark);
     
-    // Сохраняем метку
     if (type === 'from') {
         fromMark = placemark;
     } else {
         toMark = placemark;
     }
     
-    // Получаем адрес по координатам
     ymaps.geocode(coords).then(function(res) {
         let firstGeoObject = res.geoObjects.get(0);
         let address = firstGeoObject.getAddressLine();
         document.getElementById(type).value = address;
     });
     
-    // Событие при перетаскивании
     placemark.events.add('dragend', function() {
         let newCoords = placemark.geometry.getCoordinates();
         ymaps.geocode(newCoords).then(function(res) {
@@ -777,13 +831,11 @@ function createPlacemark(type, coords) {
         });
     });
     
-    // Если обе точки есть, строим маршрут
     if (fromMark && toMark) {
         buildRoute();
     }
 }
 
-// Поиск адреса из поля ввода
 function searchAddress(type, query) {
     if (!query.trim()) {
         clearPoint(type);
@@ -798,10 +850,8 @@ function searchAddress(type, query) {
             let coords = firstGeoObject.geometry.getCoordinates();
             let address = firstGeoObject.getAddressLine();
             
-            // Обновляем поле ввода с полным адресом
             document.getElementById(type).value = address;
             
-            // Удаляем старую метку если есть
             if (type === 'from' && fromMark) {
                 map.geoObjects.remove(fromMark);
                 fromMark = null;
@@ -811,7 +861,6 @@ function searchAddress(type, query) {
                 toMark = null;
             }
             
-            // Создаем новую метку
             createPlacemark(type, coords);
         } else {
             alert('Адрес не найден');
@@ -819,7 +868,6 @@ function searchAddress(type, query) {
     });
 }
 
-// Построение маршрута
 function buildRoute() {
     if (fromMark && toMark) {
         let from = fromMark.geometry.getCoordinates();
@@ -836,7 +884,6 @@ function buildRoute() {
     }
 }
 
-// Очистка конкретной точки
 function clearPoint(type) {
     document.getElementById(type).value = '';
     
@@ -855,21 +902,16 @@ function clearPoint(type) {
     }
 }
 
-// Очистка всех точек
 function clearAllPoints() {
     clearPoint('from');
     clearPoint('to');
 }
 
-// Установка адреса из склада
 function setWarehouse(type, address) {
     document.getElementById(type).value = address;
     searchAddress(type, address);
 }
 
-/* ======================
-   ПЕРЕХОД К ЗАКАЗУ
-====================== */
 function goOrder() {
     let from = document.getElementById("from")?.value;
     let to = document.getElementById("to")?.value;
