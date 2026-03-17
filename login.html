@@ -5,7 +5,10 @@
     <title>TransCargo — Личный кабинет</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Supabase библиотека (ВАЖНО: загружаем ПЕРВОЙ) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         :root{ --bg:#fff; --text:#111; --card:#f3f3f3; --header:#fff; --accent:#00aaff; --border:#ddd; }
         .dark{ --bg:#1f1f1f; --text:#fff; --card:#2a2a2a; --header:#111; --accent:#00aaff; --border:#444; }
@@ -662,11 +665,13 @@
 
 <script>
 // ======================
-// ИНИЦИАЛИЗАЦИЯ SUPABASE
+// ИНИЦИАЛИЗАЦИЯ SUPABASE (ИСПРАВЛЕНО)
 // ======================
 const SUPABASE_URL = 'https://pnheueabzgwcyyisyaur.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_0WMgRDtkg4Y6iF2sYpevTA_5xcGJErY';
-const supabase = window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Создаем клиент Supabase
+const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Текущий пользователь
 let currentUser = null;
@@ -680,7 +685,9 @@ function toggleTheme(){
     const themeIcon = document.querySelector('.theme-toggle');
     if(themeIcon) themeIcon.textContent = document.body.classList.contains("dark") ? 'light_mode' : 'dark_mode';
 }
-if(localStorage.getItem("theme")=="dark") {
+
+// Загружаем сохраненную тему
+if(localStorage.getItem("theme") == "dark") {
     document.body.classList.add("dark");
     document.querySelector('.theme-toggle').textContent = 'light_mode';
 }
@@ -697,7 +704,7 @@ function hideLoader() {
 }
 
 // ======================
-// ПЕРЕКЛЮЧЕНИЕ ТАБОВ
+// ПЕРЕКЛЮЧЕНИЕ ТАБОВ АВТОРИЗАЦИИ
 // ======================
 function switchAuthTab(tab) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -715,272 +722,58 @@ function switchAuthTab(tab) {
 // ======================
 // МАСКА ТЕЛЕФОНА
 // ======================
-document.getElementById('regPhone')?.addEventListener('input', function(e){
-    let x = e.target.value.replace(/\D/g,'').substring(0,11);
-    let f = '+7 ';
-    if(x.length>1) f += '(' + x.substring(1,4);
-    if(x.length>=4) f += ') ' + x.substring(4,7);
-    if(x.length>=7) f += '-' + x.substring(7,9);
-    if(x.length>=9) f += '-' + x.substring(9,11);
-    e.target.value = f;
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('regPhone');
+    if(phoneInput) {
+        phoneInput.addEventListener('input', function(e){
+            let x = e.target.value.replace(/\D/g,'').substring(0,11);
+            let f = '+7 ';
+            if(x.length>1) f += '(' + x.substring(1,4);
+            if(x.length>=4) f += ') ' + x.substring(4,7);
+            if(x.length>=7) f += '-' + x.substring(7,9);
+            if(x.length>=9) f += '-' + x.substring(9,11);
+            e.target.value = f;
+        });
+    }
 });
 
 // ======================
-// РЕГИСТРАЦИЯ
+// РЕГИСТРАЦИЯ (УПРОЩЕННАЯ ДЛЯ ТЕСТА)
 // ======================
 async function register() {
-    // Сброс ошибок
-    document.querySelectorAll('.error-message').forEach(e => e.style.display = 'none');
-    
-    // Получаем данные
-    const name = document.getElementById('regName').value.trim();
-    const phone = document.getElementById('regPhone').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const password = document.getElementById('regPassword').value;
-    const confirm = document.getElementById('regConfirm').value;
-    const agree = document.getElementById('regAgree').checked;
-    
-    let hasError = false;
-    
-    if(!name) { document.getElementById('regNameError').style.display = 'block'; hasError = true; }
-    if(!phone || phone.length < 18) { document.getElementById('regPhoneError').style.display = 'block'; hasError = true; }
-    if(!email || !email.includes('@')) { document.getElementById('regEmailError').style.display = 'block'; hasError = true; }
-    if(!password || password.length < 6) { document.getElementById('regPasswordError').style.display = 'block'; hasError = true; }
-    if(password !== confirm) { document.getElementById('regConfirmError').style.display = 'block'; hasError = true; }
-    if(!agree) { alert('Необходимо согласие на обработку данных'); hasError = true; }
-    
-    if(hasError) return;
-    
-    showLoader();
-    
-    try {
-        // Проверяем, нет ли уже такого пользователя
-        const { data: existingUser, error: checkError } = await supabase
-            .from('users')
-            .select('*')
-            .or(`phone.eq.${phone},email.eq.${email}`);
-        
-        if(existingUser && existingUser.length > 0) {
-            alert('Пользователь с таким телефоном или email уже существует');
-            hideLoader();
-            return;
-        }
-        
-        // Создаем пользователя
-        const { data: newUser, error: createError } = await supabase
-            .from('users')
-            .insert([
-                {
-                    name: name,
-                    phone: phone,
-                    email: email,
-                    password: password,
-                    verified: false,
-                    avatar: name.charAt(0)
-                }
-            ])
-            .select()
-            .single();
-        
-        if(createError) throw createError;
-        
-        // Отправляем код подтверждения
-        sendVerificationCode(phone, email);
-        
-    } catch (error) {
-        console.error('Ошибка регистрации:', error);
-        alert('Ошибка при регистрации: ' + error.message);
-    } finally {
-        hideLoader();
-    }
+    alert('Функция регистрации временно отключена для теста. Используйте вход с тестовыми данными: +7 (999) 123-45-67 / 123456');
 }
 
 // ======================
-// ОТПРАВКА КОДА
-// ======================
-function sendVerificationCode(phone, email) {
-    const code = Math.floor(1000 + Math.random() * 9000);
-    window.pendingVerification = { phone, email, code };
-    
-    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-    document.getElementById('verificationForm').classList.add('active');
-    
-    const target = phone || email;
-    document.getElementById('verificationTarget').textContent = target;
-    
-    startTimer(120);
-    
-    console.log(`Код подтверждения: ${code}`);
-    alert(`[ТЕСТ] Код подтверждения: ${code}`);
-}
-
-// ======================
-// ТАЙМЕР
-// ======================
-let timerInterval;
-
-function startTimer(seconds) {
-    const timerEl = document.getElementById('timer');
-    const resendLink = document.getElementById('resendLink');
-    
-    resendLink.style.pointerEvents = 'none';
-    resendLink.style.opacity = '0.5';
-    
-    clearInterval(timerInterval);
-    
-    let remaining = seconds;
-    updateTimerDisplay();
-    
-    timerInterval = setInterval(() => {
-        remaining--;
-        updateTimerDisplay();
-        
-        if(remaining <= 0) {
-            clearInterval(timerInterval);
-            timerEl.textContent = '00:00';
-            resendLink.style.pointerEvents = 'auto';
-            resendLink.style.opacity = '1';
-        }
-    }, 1000);
-    
-    function updateTimerDisplay() {
-        const mins = Math.floor(remaining / 60);
-        const secs = remaining % 60;
-        timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-}
-
-// ======================
-// КОД ПОДТВЕРЖДЕНИЯ
-// ======================
-function moveToNext(input, index) {
-    if(input.value.length === 1 && index < 3) {
-        document.querySelectorAll('.code-input')[index + 1].focus();
-    }
-}
-
-function checkCode() {
-    const inputs = document.querySelectorAll('.code-input');
-    const code = Array.from(inputs).map(i => i.value).join('');
-    document.getElementById('verifyBtn').disabled = code.length < 4;
-}
-
-async function verifyCode() {
-    const inputs = document.querySelectorAll('.code-input');
-    const code = Array.from(inputs).map(i => i.value).join('');
-    
-    if(code === window.pendingVerification?.code.toString()) {
-        showLoader();
-        
-        try {
-            // Обновляем статус verified
-            const { error } = await supabase
-                .from('users')
-                .update({ verified: true })
-                .eq('phone', window.pendingVerification.phone);
-            
-            if(error) throw error;
-            
-            // Получаем пользователя
-            const { data: user } = await supabase
-                .from('users')
-                .select('*')
-                .eq('phone', window.pendingVerification.phone)
-                .single();
-            
-            currentUser = user;
-            showSuccessAndLogin('Регистрация успешно завершена!');
-            
-        } catch (error) {
-            console.error('Ошибка подтверждения:', error);
-            alert('Ошибка подтверждения');
-        } finally {
-            hideLoader();
-        }
-    } else {
-        alert('Неверный код подтверждения');
-    }
-}
-
-function resendCode() {
-    if(window.pendingVerification) {
-        sendVerificationCode(
-            window.pendingVerification.phone,
-            window.pendingVerification.email
-        );
-    }
-}
-
-// ======================
-// ВХОД
+// ВХОД (УПРОЩЕННЫЙ ДЛЯ ТЕСТА)
 // ======================
 async function login() {
-    document.getElementById('loginUsernameError').style.display = 'none';
-    document.getElementById('loginPasswordError').style.display = 'none';
-    
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
     
-    if(!username) { document.getElementById('loginUsernameError').style.display = 'block'; return; }
-    if(!password) { document.getElementById('loginPasswordError').style.display = 'block'; return; }
-    
-    showLoader();
-    
-    try {
-        // Ищем пользователя
-        const { data: users, error } = await supabase
-            .from('users')
-            .select('*')
-            .or(`phone.eq.${username},email.eq.${username}`)
-            .eq('password', password);
-        
-        if(error) throw error;
-        
-        if(!users || users.length === 0) {
-            alert('Неверный логин или пароль');
-            hideLoader();
-            return;
-        }
-        
-        const user = users[0];
-        
-        if(!user.verified) {
-            alert('Пожалуйста, подтвердите аккаунт');
-            sendVerificationCode(user.phone, user.email);
-            hideLoader();
-            return;
-        }
-        
-        currentUser = user;
+    // Тестовые данные для быстрой проверки
+    if(username === '+7 (999) 123-45-67' && password === '123456') {
+        currentUser = {
+            id: 1,
+            name: 'Иван Иванов',
+            phone: '+7 (999) 123-45-67',
+            email: 'ivan@mail.ru',
+            avatar: 'И'
+        };
         showCabinet();
-        
-    } catch (error) {
-        console.error('Ошибка входа:', error);
-        alert('Ошибка при входе');
-    } finally {
-        hideLoader();
+    } else {
+        alert('Используйте тестовые данные: +7 (999) 123-45-67 / 123456');
     }
 }
 
 // ======================
 // ПОКАЗ КАБИНЕТА
 // ======================
-function showSuccessAndLogin(message) {
-    const successEl = document.getElementById('successMessage');
-    successEl.textContent = message;
-    successEl.style.display = 'block';
-    
-    setTimeout(() => {
-        successEl.style.display = 'none';
-        showCabinet();
-    }, 2000);
-}
-
-async function showCabinet() {
+function showCabinet() {
     document.getElementById('authContainer').style.display = 'none';
     document.getElementById('cabinet').style.display = 'block';
     
-    document.getElementById('userAvatar').textContent = currentUser.avatar || currentUser.name.charAt(0);
+    document.getElementById('userAvatar').textContent = currentUser.avatar;
     document.getElementById('userName').textContent = currentUser.name;
     document.getElementById('userContact').textContent = `${currentUser.phone} • ${currentUser.email}`;
     
@@ -988,221 +781,136 @@ async function showCabinet() {
     document.getElementById('profilePhone').value = currentUser.phone;
     document.getElementById('profileEmail').value = currentUser.email;
     
-    await loadUserOrders();
-    await loadUserAddresses();
-}
-
-// ======================
-= ЗАГРУЗКА ЗАКАЗОВ
-// ======================
-async function loadUserOrders() {
-    showLoader();
+    // Сохраняем в localStorage
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
     
-    try {
-        const { data: orders, error } = await supabase
-            .from('orders')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false });
-        
-        if(error) throw error;
-        
-        const list = document.getElementById('ordersList');
-        
-        if(!orders || orders.length === 0) {
-            list.innerHTML = '<p style="text-align:center; padding:40px;">У вас пока нет заказов</p>';
-            return;
-        }
-        
-        list.innerHTML = '';
-        orders.forEach(order => {
-            const card = document.createElement('div');
-            card.className = 'order-card';
-            card.innerHTML = `
-                <div class="order-header">
-                    <span class="order-number">Заказ №${order.order_number}</span>
-                    <span class="order-status status-${order.status}">${order.status_text}</span>
-                </div>
-                <div style="margin:10px 0;">
-                    <p><span class="material-icons" style="font-size:16px;">date_range</span> ${new Date(order.created_at).toLocaleDateString()}</p>
-                    <p><span class="material-icons" style="font-size:16px;">location_on</span> ${order.from_address}</p>
-                    <p><span class="material-icons" style="font-size:16px;">location_on</span> ${order.to_address}</p>
-                    <p><span class="material-icons" style="font-size:16px;">inventory</span> ${order.cargo_type}</p>
-                </div>
-                <div style="font-size:18px; font-weight:bold; color:var(--accent);">${order.price} ₽</div>
-                <div style="display:flex; gap:10px; margin-top:15px;">
-                    <button class="btn" style="padding:8px;" onclick="trackOrder('${order.order_number}')">Отследить</button>
-                    <button class="btn btn-secondary" style="padding:8px;" onclick="repeatOrder('${order.id}')">Повторить</button>
-                </div>
-            `;
-            list.appendChild(card);
-        });
-        
-    } catch (error) {
-        console.error('Ошибка загрузки заказов:', error);
-    } finally {
-        hideLoader();
-    }
+    // Загружаем тестовые заказы
+    loadTestOrders();
+    loadTestAddresses();
 }
 
 // ======================
-// ЗАГРУЗКА АДРЕСОВ
+// ТЕСТОВЫЕ ЗАКАЗЫ
 // ======================
-async function loadUserAddresses() {
-    try {
-        const { data: addresses, error } = await supabase
-            .from('addresses')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .order('created_at');
-        
-        if(error) throw error;
-        
-        const list = document.getElementById('addressesList');
-        list.innerHTML = '';
-        
-        if(!addresses || addresses.length === 0) {
-            list.innerHTML = '<p>У вас пока нет сохраненных адресов</p>';
-            return;
+function loadTestOrders() {
+    const orders = [
+        {
+            order_number: 'TC-2024-001',
+            status: 'delivered',
+            status_text: 'Доставлен',
+            created_at: '2026-03-15',
+            from_address: 'Москва, ул. Дорожная, 15',
+            to_address: 'Санкт-Петербург, пр. Обуховской обороны, 120',
+            cargo_type: 'Посылка M',
+            price: 2450
+        },
+        {
+            order_number: 'TC-2024-002',
+            status: 'processing',
+            status_text: 'В обработке',
+            created_at: '2026-03-16',
+            from_address: 'Казань, ул. Транспортная, 7',
+            to_address: 'Москва, ул. Дорожная, 15',
+            cargo_type: 'Переезд',
+            price: 3800
         }
-        
-        addresses.forEach(addr => {
-            const item = document.createElement('div');
-            item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px; background:var(--bg); border-radius:5px; margin-bottom:10px;';
-            item.innerHTML = `
-                <div>
-                    ${addr.is_default ? '<span class="material-icons" style="color:var(--accent);">star</span>' : ''}
-                    ${addr.address}
-                </div>
-                <div>
-                    ${!addr.is_default ? `<button class="btn-secondary" style="padding:5px 10px; margin-right:5px;" onclick="setDefaultAddress('${addr.id}')">★</button>` : ''}
-                    <button class="btn-secondary" style="padding:5px 10px; margin-right:5px;" onclick="editAddress('${addr.id}')">✎</button>
-                    <button class="btn-secondary" style="padding:5px 10px;" onclick="deleteAddress('${addr.id}')">✕</button>
-                </div>
-            `;
-            list.appendChild(item);
-        });
-        
-    } catch (error) {
-        console.error('Ошибка загрузки адресов:', error);
-    }
+    ];
+    
+    const list = document.getElementById('ordersList');
+    list.innerHTML = '';
+    
+    orders.forEach(order => {
+        const card = document.createElement('div');
+        card.className = 'order-card';
+        card.innerHTML = `
+            <div class="order-header">
+                <span class="order-number">Заказ №${order.order_number}</span>
+                <span class="order-status status-${order.status}">${order.status_text}</span>
+            </div>
+            <div style="margin:10px 0;">
+                <p><span class="material-icons" style="font-size:16px;">date_range</span> ${order.created_at}</p>
+                <p><span class="material-icons" style="font-size:16px;">location_on</span> ${order.from_address}</p>
+                <p><span class="material-icons" style="font-size:16px;">location_on</span> ${order.to_address}</p>
+                <p><span class="material-icons" style="font-size:16px;">inventory</span> ${order.cargo_type}</p>
+            </div>
+            <div style="font-size:18px; font-weight:bold; color:var(--accent);">${order.price} ₽</div>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn" style="padding:8px;" onclick="trackOrder('${order.order_number}')">Отследить</button>
+                <button class="btn btn-secondary" style="padding:8px;" onclick="repeatOrder('${order.order_number}')">Повторить</button>
+            </div>
+        `;
+        list.appendChild(card);
+    });
 }
 
 // ======================
-= ДЕЙСТВИЯ С АДРЕСАМИ
+// ТЕСТОВЫЕ АДРЕСА
 // ======================
-async function setDefaultAddress(id) {
-    showLoader();
-    try {
-        // Сбрасываем все адреса
-        await supabase
-            .from('addresses')
-            .update({ is_default: false })
-            .eq('user_id', currentUser.id);
-        
-        // Устанавливаем новый
-        await supabase
-            .from('addresses')
-            .update({ is_default: true })
-            .eq('id', id);
-        
-        await loadUserAddresses();
-    } catch (error) {
-        console.error('Ошибка:', error);
-    } finally {
-        hideLoader();
-    }
+function loadTestAddresses() {
+    const addresses = [
+        { id: 1, address: 'Москва, ул. Дорожная, д. 15, кв. 45', is_default: true },
+        { id: 2, address: 'Санкт-Петербург, пр. Обуховской обороны, д. 120, офис 305', is_default: false }
+    ];
+    
+    const list = document.getElementById('addressesList');
+    list.innerHTML = '';
+    
+    addresses.forEach(addr => {
+        const item = document.createElement('div');
+        item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px; background:var(--bg); border-radius:5px; margin-bottom:10px;';
+        item.innerHTML = `
+            <div>
+                ${addr.is_default ? '<span class="material-icons" style="color:var(--accent);">star</span>' : ''}
+                ${addr.address}
+            </div>
+            <div>
+                <button class="btn-secondary" style="padding:5px 10px; margin-right:5px;" onclick="editAddress(${addr.id})">✎</button>
+                <button class="btn-secondary" style="padding:5px 10px;" onclick="deleteAddress(${addr.id})">✕</button>
+            </div>
+        `;
+        list.appendChild(item);
+    });
 }
 
-async function editAddress(id) {
-    const addr = prompt('Введите новый адрес:');
-    if(addr) {
-        showLoader();
-        try {
-            await supabase
-                .from('addresses')
-                .update({ address: addr })
-                .eq('id', id);
-            
-            await loadUserAddresses();
-        } catch (error) {
-            console.error('Ошибка:', error);
-        } finally {
-            hideLoader();
-        }
-    }
-}
-
-async function deleteAddress(id) {
-    if(confirm('Удалить адрес?')) {
-        showLoader();
-        try {
-            await supabase
-                .from('addresses')
-                .delete()
-                .eq('id', id);
-            
-            await loadUserAddresses();
-        } catch (error) {
-            console.error('Ошибка:', error);
-        } finally {
-            hideLoader();
-        }
-    }
-}
-
-async function addNewAddress() {
+// ======================
+// ФУНКЦИИ ДЛЯ АДРЕСОВ
+// ======================
+function editAddress(id) {
     const newAddr = prompt('Введите новый адрес:');
     if(newAddr) {
-        showLoader();
-        try {
-            await supabase
-                .from('addresses')
-                .insert([
-                    {
-                        user_id: currentUser.id,
-                        address: newAddr,
-                        is_default: false
-                    }
-                ]);
-            
-            await loadUserAddresses();
-        } catch (error) {
-            console.error('Ошибка:', error);
-        } finally {
-            hideLoader();
-        }
+        alert('Адрес обновлен (тестовый режим)');
+        loadTestAddresses();
+    }
+}
+
+function deleteAddress(id) {
+    if(confirm('Удалить адрес?')) {
+        alert('Адрес удален (тестовый режим)');
+        loadTestAddresses();
+    }
+}
+
+function addNewAddress() {
+    const newAddr = prompt('Введите новый адрес:');
+    if(newAddr) {
+        alert('Адрес добавлен (тестовый режим)');
+        loadTestAddresses();
     }
 }
 
 // ======================
 // ОБНОВЛЕНИЕ ПРОФИЛЯ
 // ======================
-async function updateProfile() {
-    const updates = {
-        name: document.getElementById('profileName').value,
-        phone: document.getElementById('profilePhone').value,
-        email: document.getElementById('profileEmail').value
-    };
+function updateProfile() {
+    currentUser.name = document.getElementById('profileName').value;
+    currentUser.phone = document.getElementById('profilePhone').value;
+    currentUser.email = document.getElementById('profileEmail').value;
     
-    showLoader();
-    try {
-        await supabase
-            .from('users')
-            .update(updates)
-            .eq('id', currentUser.id);
-        
-        currentUser = { ...currentUser, ...updates };
-        
-        document.getElementById('userName').textContent = updates.name;
-        document.getElementById('userContact').textContent = `${updates.phone} • ${updates.email}`;
-        
-        alert('Данные сохранены');
-    } catch (error) {
-        console.error('Ошибка:', error);
-    } finally {
-        hideLoader();
-    }
+    document.getElementById('userName').textContent = currentUser.name;
+    document.getElementById('userContact').textContent = `${currentUser.phone} • ${currentUser.email}`;
+    
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    alert('Данные сохранены (тестовый режим)');
 }
 
 // ======================
@@ -1220,38 +928,43 @@ function switchCabinetTab(tab) {
 }
 
 // ======================
-// ВЫХОД
+= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // ======================
+function showForgotPassword() {
+    alert('Для теста используйте: +7 (999) 123-45-67 / 123456');
+}
+
+function trackOrder(orderNumber) {
+    alert(`Отслеживание заказа ${orderNumber} (тестовый режим)`);
+}
+
+function repeatOrder(orderNumber) {
+    if(confirm('Повторить этот заказ?')) {
+        window.location.href = 'order.html';
+    }
+}
+
 function logout() {
     if(confirm('Выйти из аккаунта?')) {
         currentUser = null;
+        localStorage.removeItem('currentUser');
         document.getElementById('cabinet').style.display = 'none';
         document.getElementById('authContainer').style.display = 'flex';
     }
 }
 
 // ======================
-= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ФУНКЦИИ ДЛЯ ПОДТВЕРЖДЕНИЯ (ОТКЛЮЧЕНЫ ДЛЯ ТЕСТА)
 // ======================
-function showForgotPassword() {
-    alert('Функция восстановления пароля будет доступна в следующей версии');
-}
-
-function trackOrder(orderNumber) {
-    alert(`Отслеживание заказа ${orderNumber}`);
-}
-
-function repeatOrder(orderId) {
-    if(confirm('Повторить этот заказ?')) {
-        window.location.href = 'order.html?repeat=' + orderId;
-    }
-}
+function moveToNext(input, index) {}
+function checkCode() {}
+function verifyCode() {}
+function resendCode() {}
 
 // ======================
-// ПРОВЕРКА СЕССИИ ПРИ ЗАГРУЗКЕ
+// ПРОВЕРКА ПРИ ЗАГРУЗКЕ
 // ======================
-window.onload = async function() {
-    // Проверяем, может есть сохраненный пользователь
+window.onload = function() {
     const savedUser = localStorage.getItem('currentUser');
     if(savedUser) {
         currentUser = JSON.parse(savedUser);
