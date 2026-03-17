@@ -117,6 +117,7 @@ border:none;
 border-radius:6px;
 color:white;
 font-weight:bold;
+background:#888;
 }
 
 button.disabled{
@@ -257,6 +258,7 @@ display:grid;
 grid-template-columns:1fr 1fr;
 gap:40px;
 padding:60px 0;
+font-size:16px;
 }
 
 footer{
@@ -264,6 +266,14 @@ background:var(--header);
 padding:25px;
 text-align:center;
 border-top:1px solid var(--border);
+}
+
+/* DARK FIX TEXT */
+
+.dark .container,
+.dark h2,
+.dark h3{
+color:#fff;
 }
 
 .fade{
@@ -465,8 +475,20 @@ Email: info@transcargo.ru<br><br>
 /* THEME */
 
 function toggleTheme(){
+
 document.body.classList.toggle("dark");
+
+localStorage.setItem(
+"theme",
+document.body.classList.contains("dark") ? "dark":"light"
+);
+
 }
+
+if(localStorage.getItem("theme")=="dark"){
+document.body.classList.add("dark");
+}
+
 
 /* SERVICE */
 
@@ -477,7 +499,8 @@ window.location="order.html";
 
 }
 
-/* FORM */
+
+/* FORM VALIDATION */
 
 const nameInput=document.getElementById("name");
 const phoneInput=document.getElementById("phone");
@@ -510,6 +533,7 @@ sendBtn.title="Введите данные";
 nameInput.addEventListener("input",validateForm);
 phoneInput.addEventListener("input",validateForm);
 
+
 /* PHONE MASK */
 
 phoneInput.addEventListener('input',function(e){
@@ -527,6 +551,7 @@ e.target.value=formatted;
 
 });
 
+
 /* MAP */
 
 ymaps.ready(init);
@@ -540,6 +565,38 @@ center:[55.75,37.61],
 zoom:5
 });
 
+
+/* склады */
+
+let warehouses=[
+
+{coords:[55.751244,37.618423],name:"Москва склад"},
+{coords:[59.9342802,30.3350986],name:"Санкт-Петербург склад"},
+{coords:[55.796127,49.106405],name:"Казань склад"},
+{coords:[56.838926,60.605703],name:"Екатеринбург склад"}
+
+];
+
+warehouses.forEach(w=>{
+
+let placemark=new ymaps.Placemark(
+
+w.coords,
+{balloonContent:w.name},
+
+{
+preset:'islands#blueWarehouseIcon'
+}
+
+);
+
+map.geoObjects.add(placemark);
+
+});
+
+
+/* выбор точек маршрута */
+
 map.events.add('click',function(e){
 
 let coords=e.get('coords');
@@ -550,10 +607,15 @@ fromMark=new ymaps.Placemark(coords);
 map.geoObjects.add(fromMark);
 
 ymaps.geocode(coords).then(function(res){
-document.getElementById("from").value=res.geoObjects.get(0).getAddressLine();
+
+document.getElementById("from").value=
+res.geoObjects.get(0).getAddressLine();
+
 });
 
-}else{
+}
+
+else{
 
 if(toMark) map.geoObjects.remove(toMark);
 
@@ -561,7 +623,10 @@ toMark=new ymaps.Placemark(coords);
 map.geoObjects.add(toMark);
 
 ymaps.geocode(coords).then(function(res){
-document.getElementById("to").value=res.geoObjects.get(0).getAddressLine();
+
+document.getElementById("to").value=
+res.geoObjects.get(0).getAddressLine();
+
 });
 
 buildRoute();
@@ -571,6 +636,7 @@ buildRoute();
 });
 
 }
+
 
 function buildRoute(){
 
@@ -592,19 +658,62 @@ map.geoObjects.add(route);
 
 }
 
+
 function goOrder(){
 
-localStorage.setItem("from",document.getElementById("from").value);
-localStorage.setItem("to",document.getElementById("to").value);
+localStorage.setItem(
+"from",
+document.getElementById("from").value
+);
+
+localStorage.setItem(
+"to",
+document.getElementById("to").value
+);
 
 window.location="order.html";
 
 }
 
+
 function sendForm(){
+
 alert("Спасибо! Мы свяжемся с вами.");
+
 }
 
+
+/* ANIMATION */
+
+let blocks=document.querySelectorAll(".fade");
+
+window.addEventListener("scroll",function(){
+
+blocks.forEach(b=>{
+
+let pos=b.getBoundingClientRect().top;
+
+if(pos<window.innerHeight-100){
+
+b.classList.add("show");
+
+}
+
+});
+
+});
+
+  <script>
+var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),
+s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/69b562ef5024d01c38daccb3/1jjm8ktpu';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
 </script>
 
 </body>
