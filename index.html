@@ -202,6 +202,7 @@
         .address-box {
             flex: 1;
             min-width: 250px;
+            position: relative;
         }
 
         .address-box input {
@@ -216,6 +217,25 @@
 
         .address-box input:focus {
             outline: 2px solid var(--accent);
+        }
+
+        .clear-point {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #999;
+            font-size: 18px;
+            display: none;
+        }
+
+        .clear-point:hover {
+            color: var(--accent);
+        }
+
+        .address-box:hover .clear-point {
+            display: block;
         }
 
         .calculate {
@@ -464,37 +484,40 @@
 
 <div class="container map-section fade">
     <h2>Рассчитать маршрут</h2>
-    <p><small>Кликните на карту, чтобы выбрать точки отправления и назначения</small></p>
+    <p><small>👆 Кликните на карту или введите адрес в поля ниже</small></p>
     <div id="map"></div>
     
     <div class="address-boxes">
         <div class="address-box">
-            <input id="from" type="text" placeholder="Откуда" readonly>
+            <input id="from" type="text" placeholder="Откуда" onchange="searchAddress('from', this.value)">
+            <span class="clear-point" onclick="clearPoint('from')">✕</span>
         </div>
         <div class="address-box">
-            <input id="to" type="text" placeholder="Куда" readonly>
+            <input id="to" type="text" placeholder="Куда" onchange="searchAddress('to', this.value)">
+            <span class="clear-point" onclick="clearPoint('to')">✕</span>
         </div>
     </div>
     
     <button class="calculate" onclick="goOrder()">Рассчитать стоимость</button>
+    <button class="calculate" onclick="clearAllPoints()" style="background: #666; margin-left: 10px;">Очистить всё</button>
 </div>
 
 <div class="container warehouses fade">
     <h2>Склады и сортировочные центры</h2>
     <div class="warehouse-grid">
-        <div class="warehouse">
+        <div class="warehouse" onclick="setWarehouse('from', 'Москва, ул. Дорожная, 15')">
             <h3>Москва</h3>
             Главный сортировочный центр
         </div>
-        <div class="warehouse">
+        <div class="warehouse" onclick="setWarehouse('from', 'Санкт-Петербург, пр. Обуховской обороны, 120')">
             <h3>Санкт-Петербург</h3>
             Склад Северо-Запад
         </div>
-        <div class="warehouse">
+        <div class="warehouse" onclick="setWarehouse('from', 'Казань, ул. Транспортная, 7')">
             <h3>Казань</h3>
             Региональный склад
         </div>
-        <div class="warehouse">
+        <div class="warehouse" onclick="setWarehouse('from', 'Екатеринбург, ул. Грузчиков, 3')">
             <h3>Екатеринбург</h3>
             Уральский центр
         </div>
@@ -595,7 +618,6 @@ function toggleTheme() {
     localStorage.setItem("theme", 
         document.body.classList.contains("dark") ? "dark" : "light");
     
-    // Обновляем иконку
     const themeIcon = document.querySelector('.theme-toggle');
     if (themeIcon) {
         themeIcon.textContent = document.body.classList.contains("dark") ? 
@@ -603,7 +625,6 @@ function toggleTheme() {
     }
 }
 
-// Загружаем сохраненную тему
 if (localStorage.getItem("theme") == "dark") {
     document.body.classList.add("dark");
     const themeIcon = document.querySelector('.theme-toggle');
@@ -625,7 +646,7 @@ function checkFade() {
 }
 
 window.addEventListener("scroll", checkFade);
-checkFade(); // Проверяем сразу при загрузке
+checkFade();
 
 /* ======================
    ФОРМА ОБРАТНОЙ СВЯЗИ
@@ -641,14 +662,10 @@ function sendForm() {
     
     showNotification("Заявка отправлена! Мы свяжемся с вами.");
     
-    // Очищаем форму
     document.getElementById("name").value = '';
     document.getElementById("phone").value = '';
 }
 
-/* ======================
-   УВЕДОМЛЕНИЯ
-====================== */
 function showNotification(message) {
     const notification = document.createElement("div");
     notification.className = "success-message";
@@ -669,11 +686,11 @@ function goService(type) {
 }
 
 /* ======================
-   КАРТА (ИСПРАВЛЕННАЯ)
+   КАРТА (ПОЛНОСТЬЮ ИСПРАВЛЕННАЯ)
 ====================== */
 let map, fromMark, toMark, route;
+let isSettingFrom = true; // Сначала ставим точку "Откуда"
 
-// Ждем загрузки Яндекс.Карт
 ymaps.ready(initMap);
 
 function initMap() {
@@ -684,51 +701,22 @@ function initMap() {
             controls: ['zoomControl', 'fullscreenControl', 'geolocationControl']
         });
         
-        // Добавляем обработчик клика по карте
+        // Клик по карте
         map.events.add('click', function(e) {
             let coords = e.get('coords');
             
-            // Определяем, какую точку ставить (первая или вторая)
             if (!fromMark) {
                 // Ставим точку "Откуда"
-                if (fromMark) map.geoObjects.remove(fromMark);
-                
-                fromMark = new ymaps.Placemark(coords, {
-                    hintContent: 'Отправление',
-                    balloonContent: 'Точка отправления'
-                }, {
-                    preset: 'islands#greenDotIcon'
-                });
-                
-                map.geoObjects.add(fromMark);
-                
-                // Получаем адрес по координатам
-                ymaps.geocode(coords).then(function(res) {
-                    let firstGeoObject = res.geoObjects.get(0);
-                    document.getElementById("from").value = firstGeoObject.getAddressLine();
-                });
-                
-            } else {
+                createPlacemark('from', coords);
+            } else if (!toMark) {
                 // Ставим точку "Куда"
-                if (toMark) map.geoObjects.remove(toMark);
-                
-                toMark = new ymaps.Placemark(coords, {
-                    hintContent: 'Назначение',
-                    balloonContent: 'Точка назначения'
-                }, {
-                    preset: 'islands#redDotIcon'
-                });
-                
-                map.geoObjects.add(toMark);
-                
-                // Получаем адрес по координатам
-                ymaps.geocode(coords).then(function(res) {
-                    let firstGeoObject = res.geoObjects.get(0);
-                    document.getElementById("to").value = firstGeoObject.getAddressLine();
-                });
-                
-                // Строим маршрут
-                buildRoute();
+                createPlacemark('to', coords);
+            } else {
+                // Если обе точки есть, спрашиваем что делать
+                if (confirm('Обе точки уже установлены. Очистить всё и поставить новую точку отправления?')) {
+                    clearAllPoints();
+                    createPlacemark('from', coords);
+                }
             }
         });
         
@@ -739,21 +727,144 @@ function initMap() {
     }
 }
 
+// Создание метки
+function createPlacemark(type, coords) {
+    let options = {
+        draggable: true,
+        preset: type === 'from' ? 'islands#greenDotIcon' : 'islands#redDotIcon'
+    };
+    
+    let hint = type === 'from' ? 'Отправление' : 'Назначение';
+    
+    let placemark = new ymaps.Placemark(coords, {
+        hintContent: hint,
+        balloonContent: hint
+    }, options);
+    
+    // Если это точка "Куда", удаляем старую
+    if (type === 'to' && toMark) {
+        map.geoObjects.remove(toMark);
+    }
+    
+    // Добавляем на карту
+    map.geoObjects.add(placemark);
+    
+    // Сохраняем метку
+    if (type === 'from') {
+        fromMark = placemark;
+    } else {
+        toMark = placemark;
+    }
+    
+    // Получаем адрес по координатам
+    ymaps.geocode(coords).then(function(res) {
+        let firstGeoObject = res.geoObjects.get(0);
+        let address = firstGeoObject.getAddressLine();
+        document.getElementById(type).value = address;
+    });
+    
+    // Событие при перетаскивании
+    placemark.events.add('dragend', function() {
+        let newCoords = placemark.geometry.getCoordinates();
+        ymaps.geocode(newCoords).then(function(res) {
+            let firstGeoObject = res.geoObjects.get(0);
+            let address = firstGeoObject.getAddressLine();
+            document.getElementById(type).value = address;
+            
+            if (fromMark && toMark) {
+                buildRoute();
+            }
+        });
+    });
+    
+    // Если обе точки есть, строим маршрут
+    if (fromMark && toMark) {
+        buildRoute();
+    }
+}
+
+// Поиск адреса из поля ввода
+function searchAddress(type, query) {
+    if (!query.trim()) {
+        clearPoint(type);
+        return;
+    }
+    
+    ymaps.geocode(query, {
+        results: 1
+    }).then(function(res) {
+        let firstGeoObject = res.geoObjects.get(0);
+        if (firstGeoObject) {
+            let coords = firstGeoObject.geometry.getCoordinates();
+            let address = firstGeoObject.getAddressLine();
+            
+            // Обновляем поле ввода с полным адресом
+            document.getElementById(type).value = address;
+            
+            // Удаляем старую метку если есть
+            if (type === 'from' && fromMark) {
+                map.geoObjects.remove(fromMark);
+                fromMark = null;
+            }
+            if (type === 'to' && toMark) {
+                map.geoObjects.remove(toMark);
+                toMark = null;
+            }
+            
+            // Создаем новую метку
+            createPlacemark(type, coords);
+        } else {
+            alert('Адрес не найден');
+        }
+    });
+}
+
+// Построение маршрута
 function buildRoute() {
     if (fromMark && toMark) {
         let from = fromMark.geometry.getCoordinates();
         let to = toMark.geometry.getCoordinates();
         
-        // Удаляем старый маршрут
         if (route) map.geoObjects.remove(route);
         
-        // Строим новый маршрут
         ymaps.route([from, to], {
             mapStateAutoApply: true
-        }).then(function(route) {
+        }).then(function(routeRes) {
+            route = routeRes;
             map.geoObjects.add(route);
         });
     }
+}
+
+// Очистка конкретной точки
+function clearPoint(type) {
+    document.getElementById(type).value = '';
+    
+    if (type === 'from' && fromMark) {
+        map.geoObjects.remove(fromMark);
+        fromMark = null;
+    }
+    if (type === 'to' && toMark) {
+        map.geoObjects.remove(toMark);
+        toMark = null;
+    }
+    
+    if (route) {
+        map.geoObjects.remove(route);
+        route = null;
+    }
+}
+
+// Очистка всех точек
+function clearAllPoints() {
+    clearPoint('from');
+    clearPoint('to');
+}
+
+// Установка адреса из склада
+function setWarehouse(type, address) {
+    document.getElementById(type).value = address;
+    searchAddress(type, address);
 }
 
 /* ======================
@@ -764,7 +875,7 @@ function goOrder() {
     let to = document.getElementById("to")?.value;
     
     if (!from || !to) {
-        alert("Пожалуйста, выберите точки отправления и назначения на карте");
+        alert("Пожалуйста, укажите точки отправления и назначения");
         return;
     }
     
@@ -772,34 +883,6 @@ function goOrder() {
     localStorage.setItem("to", to);
     window.location = "order.html";
 }
-
-/* ======================
-   ОЧИСТКА ТОЧЕК (если нужно)
-====================== */
-function clearPoints() {
-    if (fromMark) map.geoObjects.remove(fromMark);
-    if (toMark) map.geoObjects.remove(toMark);
-    if (route) map.geoObjects.remove(route);
-    
-    fromMark = null;
-    toMark = null;
-    route = null;
-    
-    document.getElementById("from").value = '';
-    document.getElementById("to").value = '';
-}
-
-/* ======================
-   ПРОВЕРКА ЗАГРУЗКИ КАРТЫ
-====================== */
-window.onload = function() {
-    // Если карта не загрузилась через 3 секунды, показываем сообщение
-    setTimeout(function() {
-        if (!map) {
-            console.warn("Карта не загрузилась. Проверьте API ключ.");
-        }
-    }, 3000);
-};
 </script>
 
 </body>
