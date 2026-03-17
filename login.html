@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
-    <!-- Supabase -->
+    <!-- Supabase - ВАЖНО: загружаем ДО нашего кода -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -310,10 +310,6 @@
             display:flex;
             align-items:center;
             gap:10px;
-        }
-        
-        .order-info i{
-            color:var(--accent);
         }
         
         .order-price{
@@ -676,7 +672,7 @@
             <h2>TransCargo</h2>
         </div>
         <nav>
-            <span class="material-icons theme-toggle" onclick="toggleTheme()">dark_mode</span>
+            <span class="material-icons theme-toggle" onclick="window.toggleTheme()">dark_mode</span>
             <a href="https://t.me/transcargo_support" target="_blank">Telegram</a>
             <a href="index.html">Главная</a>
             <a href="order.html">Заказать</a>
@@ -689,8 +685,8 @@
     <!-- Контейнер для входа/регистрации -->
     <div id="authContainer" class="auth-container">
         <div class="auth-tabs">
-            <div class="auth-tab active" onclick="switchAuthTab('login')">Вход</div>
-            <div class="auth-tab" onclick="switchAuthTab('register')">Регистрация</div>
+            <div class="auth-tab active" onclick="window.switchAuthTab('login')">Вход</div>
+            <div class="auth-tab" onclick="window.switchAuthTab('register')">Регистрация</div>
         </div>
         
         <!-- Форма входа -->
@@ -699,7 +695,7 @@
             <input type="email" id="loginEmail" placeholder="Email" value="test@example.com">
             <input type="password" id="loginPassword" placeholder="Пароль" value="123456">
             <div id="loginError" class="auth-error"></div>
-            <button class="auth-btn" onclick="handleLogin()">Войти</button>
+            <button class="auth-btn" onclick="window.handleLogin()">Войти</button>
             <p style="text-align:center; opacity:0.7;">Тестовый аккаунт: test@example.com / 123456</p>
         </div>
         
@@ -712,7 +708,7 @@
             <input type="password" id="registerConfirm" placeholder="Подтвердите пароль">
             <div id="registerError" class="auth-error"></div>
             <div id="registerSuccess" class="auth-success"></div>
-            <button class="auth-btn" onclick="handleRegister()">Зарегистрироваться</button>
+            <button class="auth-btn" onclick="window.handleRegister()">Зарегистрироваться</button>
         </div>
     </div>
     
@@ -723,17 +719,17 @@
                 <h1>Личный кабинет</h1>
                 <p id="userGreeting">Здравствуйте, </p>
             </div>
-            <button class="logout-btn" onclick="handleLogout()">
+            <button class="logout-btn" onclick="window.handleLogout()">
                 <span class="material-icons">logout</span> Выйти
             </button>
         </div>
         
         <!-- Табы -->
         <div class="tabs">
-            <div class="tab active" onclick="switchCabinetTab('orders')">📦 Мои заказы</div>
-            <div class="tab" onclick="switchCabinetTab('profile')">👤 Профиль</div>
-            <div class="tab" onclick="switchCabinetTab('addresses')">📍 Мои адреса</div>
-            <div class="tab" onclick="switchCabinetTab('tracking')">🔍 Отследить</div>
+            <div class="tab active" onclick="window.switchCabinetTab('orders', this)">📦 Мои заказы</div>
+            <div class="tab" onclick="window.switchCabinetTab('profile', this)">👤 Профиль</div>
+            <div class="tab" onclick="window.switchCabinetTab('addresses', this)">📍 Мои адреса</div>
+            <div class="tab" onclick="window.switchCabinetTab('tracking', this)">🔍 Отследить</div>
         </div>
         
         <!-- Мои заказы -->
@@ -764,7 +760,7 @@
                         <input type="tel" id="profilePhone" value="" placeholder="+7 (___) ___-__-__">
                     </div>
                     
-                    <button class="save-btn" onclick="saveProfile()">Сохранить изменения</button>
+                    <button class="save-btn" onclick="window.saveProfile()">Сохранить изменения</button>
                 </div>
                 
                 <div class="profile-section">
@@ -780,7 +776,7 @@
                         <input type="password" id="confirmPassword" placeholder="Подтвердите пароль">
                     </div>
                     
-                    <button class="save-btn" onclick="changePassword()">Изменить пароль</button>
+                    <button class="save-btn" onclick="window.changePassword()">Изменить пароль</button>
                 </div>
             </div>
         </div>
@@ -794,7 +790,7 @@
                     <div class="loading">Загрузка адресов...</div>
                 </div>
                 
-                <div class="add-address" onclick="addAddress()">
+                <div class="add-address" onclick="window.addAddress()">
                     <span class="material-icons" style="vertical-align:middle;">add</span> Добавить новый адрес
                 </div>
             </div>
@@ -807,7 +803,7 @@
                 
                 <div class="tracking-form">
                     <input type="text" id="trackNumber" placeholder="Введите номер заказа">
-                    <button onclick="trackOrder()">Отследить</button>
+                    <button onclick="window.trackOrder()">Отследить</button>
                 </div>
                 
                 <div id="trackingResult" style="display:none;"></div>
@@ -834,46 +830,75 @@ s0.parentNode.insertBefore(s1,s0);
 
 <script>
 // ======================
-// SUPABASE ИНИЦИАЛИЗАЦИЯ
+// ГЛОБАЛЬНЫЙ ОБЪЕКТ ДЛЯ ФУНКЦИЙ
 // ======================
-const SUPABASE_URL = 'https://pnheueabzgwcyyisyaur.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuaGV1ZWFiemd3Y3l5aXN5YXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MjY0MTUsImV4cCI6MjA4OTMwMjQxNX0.VtMdKZONRK1_6J2ZPqwWknDYd9_vDMcr1Jin06UNCv8'
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+window.supabaseClient = null;
+window.currentUser = null;
 
 // ======================
-// ТЕМА
+// ИНИЦИАЛИЗАЦИЯ SUPABASE
 // ======================
-function toggleTheme(){
+(function initSupabase() {
+    const SUPABASE_URL = 'https://pnheueabzgwcyyisyaur.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuaGV1ZWFiemd3Y3l5aXN5YXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MjY0MTUsImV4cCI6MjA4OTMwMjQxNX0.VtMdKZONRK1_6J2ZPqwWknDYd9_vDMcr1Jin06UNCv8';
+    
+    try {
+        window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('Supabase инициализирован');
+    } catch(e) {
+        console.error('Ошибка инициализации Supabase:', e);
+    }
+})();
+
+// ======================
+// ТЕМА (ИСПРАВЛЕНО)
+// ======================
+window.toggleTheme = function() {
     document.body.classList.toggle("dark");
-    localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark":"light");
+    localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
     const themeIcon = document.querySelector('.theme-toggle');
-    if(themeIcon) themeIcon.textContent = document.body.classList.contains("dark") ? 'light_mode' : 'dark_mode';
-}
+    if(themeIcon) {
+        themeIcon.textContent = document.body.classList.contains("dark") ? 'light_mode' : 'dark_mode';
+    }
+    console.log('Тема переключена');
+};
 
-// Загружаем тему
-if(localStorage.getItem("theme")=="dark") {
-    document.body.classList.add("dark");
-    document.querySelector('.theme-toggle').textContent = 'light_mode';
-}
+// Загружаем сохраненную тему
+(function loadTheme() {
+    if(localStorage.getItem("theme") == "dark") {
+        document.body.classList.add("dark");
+        const themeIcon = document.querySelector('.theme-toggle');
+        if(themeIcon) themeIcon.textContent = 'light_mode';
+    }
+})();
 
 // ======================
-// АВТОРИЗАЦИЯ
+// АВТОРИЗАЦИЯ (ИСПРАВЛЕНО)
 // ======================
-let currentUser = null;
 
 // Проверяем сессию при загрузке
 async function checkSession() {
-    const { data: { session }, error } = await supabase.auth.getSession()
-    if (session) {
-        currentUser = session.user
-        showCabinet()
-        loadUserData()
+    if (!window.supabaseClient) {
+        console.error('Supabase не инициализирован');
+        return;
+    }
+    
+    try {
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+        if (error) throw error;
+        
+        if (session) {
+            window.currentUser = session.user;
+            showCabinet();
+            loadUserData();
+        }
+    } catch (error) {
+        console.error('Ошибка проверки сессии:', error);
     }
 }
 
 // Переключение между входом и регистрацией
-function switchAuthTab(tab) {
+window.switchAuthTab = function(tab) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
     
@@ -884,68 +909,68 @@ function switchAuthTab(tab) {
         document.querySelectorAll('.auth-tab')[1].classList.add('active');
         document.getElementById('registerForm').classList.add('active');
     }
-}
+};
 
 // Вход
-async function handleLogin() {
-    const email = document.getElementById('loginEmail').value
-    const password = document.getElementById('loginPassword').value
-    const errorDiv = document.getElementById('loginError')
+window.handleLogin = async function() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('loginError');
     
-    errorDiv.textContent = ''
+    errorDiv.textContent = '';
     
     if (!email || !password) {
-        errorDiv.textContent = 'Заполните все поля'
-        return
+        errorDiv.textContent = 'Заполните все поля';
+        return;
     }
     
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
             email: email,
             password: password
-        })
+        });
         
-        if (error) throw error
+        if (error) throw error;
         
-        currentUser = data.user
-        showNotification('Успешный вход!')
-        showCabinet()
-        loadUserData()
+        window.currentUser = data.user;
+        showNotification('Успешный вход!');
+        showCabinet();
+        loadUserData();
         
     } catch (error) {
-        errorDiv.textContent = error.message
+        errorDiv.textContent = error.message;
     }
-}
+};
 
 // Регистрация
-async function handleRegister() {
-    const name = document.getElementById('registerName').value
-    const email = document.getElementById('registerEmail').value
-    const password = document.getElementById('registerPassword').value
-    const confirm = document.getElementById('registerConfirm').value
-    const errorDiv = document.getElementById('registerError')
-    const successDiv = document.getElementById('registerSuccess')
+window.handleRegister = async function() {
+    const name = document.getElementById('registerName').value;
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirm = document.getElementById('registerConfirm').value;
+    const errorDiv = document.getElementById('registerError');
+    const successDiv = document.getElementById('registerSuccess');
     
-    errorDiv.textContent = ''
-    successDiv.textContent = ''
+    errorDiv.textContent = '';
+    successDiv.textContent = '';
     
     if (!name || !email || !password || !confirm) {
-        errorDiv.textContent = 'Заполните все поля'
-        return
+        errorDiv.textContent = 'Заполните все поля';
+        return;
     }
     
     if (password.length < 6) {
-        errorDiv.textContent = 'Пароль должен быть не менее 6 символов'
-        return
+        errorDiv.textContent = 'Пароль должен быть не менее 6 символов';
+        return;
     }
     
     if (password !== confirm) {
-        errorDiv.textContent = 'Пароли не совпадают'
-        return
+        errorDiv.textContent = 'Пароли не совпадают';
+        return;
     }
     
     try {
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await window.supabaseClient.auth.signUp({
             email: email,
             password: password,
             options: {
@@ -953,428 +978,463 @@ async function handleRegister() {
                     full_name: name
                 }
             }
-        })
+        });
         
-        if (error) throw error
+        if (error) throw error;
         
-        successDiv.textContent = 'Регистрация успешна! Проверьте email для подтверждения.'
+        successDiv.textContent = 'Регистрация успешна! Проверьте email для подтверждения.';
         
         // Очищаем форму
-        document.getElementById('registerName').value = ''
-        document.getElementById('registerEmail').value = ''
-        document.getElementById('registerPassword').value = ''
-        document.getElementById('registerConfirm').value = ''
+        document.getElementById('registerName').value = '';
+        document.getElementById('registerEmail').value = '';
+        document.getElementById('registerPassword').value = '';
+        document.getElementById('registerConfirm').value = '';
         
     } catch (error) {
-        errorDiv.textContent = error.message
+        errorDiv.textContent = error.message;
     }
-}
+};
 
 // Выход
-async function handleLogout() {
+window.handleLogout = async function() {
     try {
-        const { error } = await supabase.auth.signOut()
-        if (error) throw error
+        const { error } = await window.supabaseClient.auth.signOut();
+        if (error) throw error;
         
-        currentUser = null
-        document.getElementById('authContainer').style.display = 'block'
-        document.getElementById('cabinetContainer').style.display = 'none'
-        showNotification('Вы вышли из системы')
+        window.currentUser = null;
+        document.getElementById('authContainer').style.display = 'block';
+        document.getElementById('cabinetContainer').style.display = 'none';
+        showNotification('Вы вышли из системы');
         
     } catch (error) {
-        showNotification('Ошибка при выходе: ' + error.message)
+        showNotification('Ошибка при выходе: ' + error.message);
     }
-}
+};
 
 // Показать кабинет
 function showCabinet() {
-    document.getElementById('authContainer').style.display = 'none'
-    document.getElementById('cabinetContainer').style.display = 'block'
+    document.getElementById('authContainer').style.display = 'none';
+    document.getElementById('cabinetContainer').style.display = 'block';
 }
 
 // ======================
 // ЗАГРУЗКА ДАННЫХ
 // ======================
 async function loadUserData() {
-    if (!currentUser) return
+    if (!window.currentUser) return;
     
-    // Загружаем профиль
-    const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .single()
-    
-    if (profile) {
-        document.getElementById('userGreeting').textContent = `Здравствуйте, ${profile.full_name || currentUser.email}`
-        document.getElementById('profileName').value = profile.full_name || ''
-        document.getElementById('profileEmail').value = currentUser.email
-        document.getElementById('profilePhone').value = profile.phone || ''
-    } else {
-        document.getElementById('userGreeting').textContent = `Здравствуйте, ${currentUser.email}`
-        document.getElementById('profileEmail').value = currentUser.email
+    try {
+        // Загружаем профиль
+        const { data: profile, error } = await window.supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', window.currentUser.id)
+            .single();
+        
+        if (profile) {
+            document.getElementById('userGreeting').textContent = `Здравствуйте, ${profile.full_name || window.currentUser.email}`;
+            document.getElementById('profileName').value = profile.full_name || '';
+            document.getElementById('profileEmail').value = window.currentUser.email;
+            document.getElementById('profilePhone').value = profile.phone || '';
+        } else {
+            document.getElementById('userGreeting').textContent = `Здравствуйте, ${window.currentUser.email}`;
+            document.getElementById('profileEmail').value = window.currentUser.email;
+        }
+        
+        // Загружаем заказы
+        loadOrders();
+        
+        // Загружаем адреса
+        loadAddresses();
+        
+    } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
     }
-    
-    // Загружаем заказы
-    loadOrders()
-    
-    // Загружаем адреса
-    loadAddresses()
 }
 
 // Загрузка заказов
 async function loadOrders() {
-    const grid = document.getElementById('ordersGrid')
+    const grid = document.getElementById('ordersGrid');
     
-    const { data: orders, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false })
-    
-    if (error) {
-        grid.innerHTML = '<div style="text-align:center; padding:20px;">Ошибка загрузки заказов</div>'
-        return
-    }
-    
-    if (!orders || orders.length === 0) {
-        grid.innerHTML = '<div style="text-align:center; padding:20px;">У вас пока нет заказов</div>'
-        return
-    }
-    
-    grid.innerHTML = ''
-    
-    orders.forEach(order => {
-        const statusClass = {
-            'new': 'status-new',
-            'processing': 'status-processing',
-            'delivered': 'status-delivered',
-            'cancelled': 'status-cancelled'
-        }[order.status] || 'status-new'
+    try {
+        const { data: orders, error } = await window.supabaseClient
+            .from('orders')
+            .select('*')
+            .eq('user_id', window.currentUser.id)
+            .order('created_at', { ascending: false });
         
-        const statusText = {
-            'new': 'Новый',
-            'processing': 'В обработке',
-            'delivered': 'Доставлен',
-            'cancelled': 'Отменен'
-        }[order.status] || 'Новый'
+        if (error) throw error;
         
-        const card = document.createElement('div')
-        card.className = 'order-card'
-        card.innerHTML = `
-            <div class="order-header">
-                <span class="order-number">Заказ №${order.order_number}</span>
-                <span class="order-status ${statusClass}">${statusText}</span>
-            </div>
-            <div class="order-info">
-                <p><span class="material-icons">date_range</span> ${new Date(order.created_at).toLocaleDateString()}</p>
-                <p><span class="material-icons">location_on</span> ${order.from_address}</p>
-                <p><span class="material-icons">location_on</span> ${order.to_address}</p>
-                <p><span class="material-icons">inventory</span> ${order.cargo_type}</p>
-            </div>
-            <div class="order-price">${order.price} ₽</div>
-            <div class="order-actions">
-                <button class="order-btn track" onclick="trackOrder('${order.order_number}')">Отследить</button>
-                <button class="order-btn repeat" onclick="repeatOrder('${order.order_number}')">Повторить</button>
-            </div>
-        `
-        grid.appendChild(card)
-    })
+        if (!orders || orders.length === 0) {
+            grid.innerHTML = '<div style="text-align:center; padding:20px;">У вас пока нет заказов</div>';
+            return;
+        }
+        
+        grid.innerHTML = '';
+        
+        orders.forEach(order => {
+            const statusClass = {
+                'new': 'status-new',
+                'processing': 'status-processing',
+                'delivered': 'status-delivered',
+                'cancelled': 'status-cancelled'
+            }[order.status] || 'status-new';
+            
+            const statusText = {
+                'new': 'Новый',
+                'processing': 'В обработке',
+                'delivered': 'Доставлен',
+                'cancelled': 'Отменен'
+            }[order.status] || 'Новый';
+            
+            const card = document.createElement('div');
+            card.className = 'order-card';
+            card.innerHTML = `
+                <div class="order-header">
+                    <span class="order-number">Заказ №${order.order_number}</span>
+                    <span class="order-status ${statusClass}">${statusText}</span>
+                </div>
+                <div class="order-info">
+                    <p><span class="material-icons">date_range</span> ${new Date(order.created_at).toLocaleDateString()}</p>
+                    <p><span class="material-icons">location_on</span> ${order.from_address}</p>
+                    <p><span class="material-icons">location_on</span> ${order.to_address}</p>
+                    <p><span class="material-icons">inventory</span> ${order.cargo_type}</p>
+                </div>
+                <div class="order-price">${order.price} ₽</div>
+                <div class="order-actions">
+                    <button class="order-btn track" onclick="window.trackOrder('${order.order_number}')">Отследить</button>
+                    <button class="order-btn repeat" onclick="window.repeatOrder('${order.order_number}')">Повторить</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+        
+    } catch (error) {
+        grid.innerHTML = '<div style="text-align:center; padding:20px;">Ошибка загрузки заказов</div>';
+    }
 }
 
 // Загрузка адресов
 async function loadAddresses() {
-    const list = document.getElementById('addressesList')
+    const list = document.getElementById('addressesList');
     
-    const { data: addresses, error } = await supabase
-        .from('addresses')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('is_default', { ascending: false })
-    
-    if (error) {
-        list.innerHTML = '<div style="text-align:center; padding:20px;">Ошибка загрузки адресов</div>'
-        return
+    try {
+        const { data: addresses, error } = await window.supabaseClient
+            .from('addresses')
+            .select('*')
+            .eq('user_id', window.currentUser.id)
+            .order('is_default', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!addresses || addresses.length === 0) {
+            list.innerHTML = '<div style="text-align:center; padding:20px;">У вас пока нет сохраненных адресов</div>';
+            return;
+        }
+        
+        list.innerHTML = '';
+        
+        addresses.forEach(addr => {
+            const item = document.createElement('div');
+            item.className = `address-item ${addr.is_default ? 'default' : ''}`;
+            item.innerHTML = `
+                <div>
+                    ${addr.is_default ? '<span class="material-icons" style="color:var(--accent);">star</span>' : ''}
+                    ${addr.address}
+                </div>
+                <div class="address-actions">
+                    ${!addr.is_default ? `<button onclick="window.setDefaultAddress('${addr.id}')">★</button>` : ''}
+                    <button onclick="window.editAddress('${addr.id}', '${addr.address}')">✎</button>
+                    <button onclick="window.deleteAddress('${addr.id}')">✕</button>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+        
+    } catch (error) {
+        list.innerHTML = '<div style="text-align:center; padding:20px;">Ошибка загрузки адресов</div>';
     }
-    
-    if (!addresses || addresses.length === 0) {
-        list.innerHTML = '<div style="text-align:center; padding:20px;">У вас пока нет сохраненных адресов</div>'
-        return
-    }
-    
-    list.innerHTML = ''
-    
-    addresses.forEach(addr => {
-        const item = document.createElement('div')
-        item.className = `address-item ${addr.is_default ? 'default' : ''}`
-        item.innerHTML = `
-            <div>
-                ${addr.is_default ? '<span class="material-icons" style="color:var(--accent);">star</span>' : ''}
-                ${addr.address}
-            </div>
-            <div class="address-actions">
-                ${!addr.is_default ? `<button onclick="setDefaultAddress('${addr.id}')">★</button>` : ''}
-                <button onclick="editAddress('${addr.id}', '${addr.address}')">✎</button>
-                <button onclick="deleteAddress('${addr.id}')">✕</button>
-            </div>
-        `
-        list.appendChild(item)
-    })
 }
 
 // ======================
 // ДЕЙСТВИЯ С ПРОФИЛЕМ
 // ======================
-async function saveProfile() {
-    const name = document.getElementById('profileName').value
-    const phone = document.getElementById('profilePhone').value
+window.saveProfile = async function() {
+    const name = document.getElementById('profileName').value;
+    const phone = document.getElementById('profilePhone').value;
     
-    const { error } = await supabase
-        .from('profiles')
-        .upsert({
-            id: currentUser.id,
-            full_name: name,
-            phone: phone,
-            updated_at: new Date()
-        })
-    
-    if (error) {
-        showNotification('Ошибка при сохранении: ' + error.message)
-    } else {
-        showNotification('Данные сохранены')
-        document.getElementById('userGreeting').textContent = `Здравствуйте, ${name || currentUser.email}`
+    try {
+        const { error } = await window.supabaseClient
+            .from('profiles')
+            .upsert({
+                id: window.currentUser.id,
+                full_name: name,
+                phone: phone,
+                updated_at: new Date()
+            });
+        
+        if (error) throw error;
+        
+        showNotification('Данные сохранены');
+        document.getElementById('userGreeting').textContent = `Здравствуйте, ${name || window.currentUser.email}`;
+        
+    } catch (error) {
+        showNotification('Ошибка при сохранении: ' + error.message);
     }
-}
+};
 
-async function changePassword() {
-    const newPass = document.getElementById('newPassword').value
-    const confirm = document.getElementById('confirmPassword').value
+window.changePassword = async function() {
+    const newPass = document.getElementById('newPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
     
     if (!newPass || !confirm) {
-        showNotification('Заполните все поля')
-        return
+        showNotification('Заполните все поля');
+        return;
     }
     
     if (newPass.length < 6) {
-        showNotification('Пароль должен быть не менее 6 символов')
-        return
+        showNotification('Пароль должен быть не менее 6 символов');
+        return;
     }
     
     if (newPass !== confirm) {
-        showNotification('Пароли не совпадают')
-        return
+        showNotification('Пароли не совпадают');
+        return;
     }
     
-    const { error } = await supabase.auth.updateUser({
-        password: newPass
-    })
-    
-    if (error) {
-        showNotification('Ошибка: ' + error.message)
-    } else {
-        showNotification('Пароль успешно изменен')
-        document.getElementById('newPassword').value = ''
-        document.getElementById('confirmPassword').value = ''
+    try {
+        const { error } = await window.supabaseClient.auth.updateUser({
+            password: newPass
+        });
+        
+        if (error) throw error;
+        
+        showNotification('Пароль успешно изменен');
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message);
     }
-}
+};
 
 // ======================
 // ДЕЙСТВИЯ С АДРЕСАМИ
 // ======================
-async function addAddress() {
-    const newAddr = prompt('Введите новый адрес:')
-    if (!newAddr) return
+window.addAddress = async function() {
+    const newAddr = prompt('Введите новый адрес:');
+    if (!newAddr) return;
     
-    const { error } = await supabase
-        .from('addresses')
-        .insert({
-            user_id: currentUser.id,
-            address: newAddr,
-            is_default: false
-        })
-    
-    if (error) {
-        showNotification('Ошибка при добавлении: ' + error.message)
-    } else {
-        showNotification('Адрес добавлен')
-        loadAddresses()
+    try {
+        const { error } = await window.supabaseClient
+            .from('addresses')
+            .insert({
+                user_id: window.currentUser.id,
+                address: newAddr,
+                is_default: false
+            });
+        
+        if (error) throw error;
+        
+        showNotification('Адрес добавлен');
+        loadAddresses();
+        
+    } catch (error) {
+        showNotification('Ошибка при добавлении: ' + error.message);
     }
-}
+};
 
-async function setDefaultAddress(id) {
-    // Сначала сбрасываем все адреса
-    await supabase
-        .from('addresses')
-        .update({ is_default: false })
-        .eq('user_id', currentUser.id)
-    
-    // Устанавливаем новый по умолчанию
-    const { error } = await supabase
-        .from('addresses')
-        .update({ is_default: true })
-        .eq('id', id)
-    
-    if (error) {
-        showNotification('Ошибка: ' + error.message)
-    } else {
-        showNotification('Адрес по умолчанию изменен')
-        loadAddresses()
+window.setDefaultAddress = async function(id) {
+    try {
+        // Сначала сбрасываем все адреса
+        await window.supabaseClient
+            .from('addresses')
+            .update({ is_default: false })
+            .eq('user_id', window.currentUser.id);
+        
+        // Устанавливаем новый по умолчанию
+        const { error } = await window.supabaseClient
+            .from('addresses')
+            .update({ is_default: true })
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        showNotification('Адрес по умолчанию изменен');
+        loadAddresses();
+        
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message);
     }
-}
+};
 
-async function editAddress(id, oldAddress) {
-    const newAddr = prompt('Измените адрес:', oldAddress)
-    if (!newAddr || newAddr === oldAddress) return
+window.editAddress = async function(id, oldAddress) {
+    const newAddr = prompt('Измените адрес:', oldAddress);
+    if (!newAddr || newAddr === oldAddress) return;
     
-    const { error } = await supabase
-        .from('addresses')
-        .update({ address: newAddr })
-        .eq('id', id)
-    
-    if (error) {
-        showNotification('Ошибка: ' + error.message)
-    } else {
-        showNotification('Адрес обновлен')
-        loadAddresses()
+    try {
+        const { error } = await window.supabaseClient
+            .from('addresses')
+            .update({ address: newAddr })
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        showNotification('Адрес обновлен');
+        loadAddresses();
+        
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message);
     }
-}
+};
 
-async function deleteAddress(id) {
-    if (!confirm('Удалить адрес?')) return
+window.deleteAddress = async function(id) {
+    if (!confirm('Удалить адрес?')) return;
     
-    const { error } = await supabase
-        .from('addresses')
-        .delete()
-        .eq('id', id)
-    
-    if (error) {
-        showNotification('Ошибка: ' + error.message)
-    } else {
-        showNotification('Адрес удален')
-        loadAddresses()
+    try {
+        const { error } = await window.supabaseClient
+            .from('addresses')
+            .delete()
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        showNotification('Адрес удален');
+        loadAddresses();
+        
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message);
     }
-}
+};
 
 // ======================
 // ОТСЛЕЖИВАНИЕ
 // ======================
-async function trackOrder(number = null) {
-    const trackNum = number || document.getElementById('trackNumber').value
+window.trackOrder = async function(number = null) {
+    const trackNum = number || document.getElementById('trackNumber').value;
     
     if (!trackNum) {
-        showNotification('Введите номер заказа')
-        return
+        showNotification('Введите номер заказа');
+        return;
     }
     
-    const { data: order, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('order_number', trackNum)
-        .single()
-    
-    const resultDiv = document.getElementById('trackingResult')
-    
-    if (error || !order) {
-        resultDiv.style.display = 'block'
-        resultDiv.innerHTML = '<div style="text-align:center; padding:20px;">Заказ не найден</div>'
-        return
-    }
-    
-    // Определяем статус
-    const steps = {
-        'new': [true, false, false, false],
-        'processing': [true, true, false, false],
-        'delivered': [true, true, true, true],
-        'cancelled': [false, false, false, false]
-    }
-    
-    const status = order.status || 'new'
-    const stepStatus = steps[status] || steps.new
-    
-    resultDiv.style.display = 'block'
-    resultDiv.innerHTML = `
-        <h4>Заказ № ${order.order_number}</h4>
+    try {
+        const { data: order, error } = await window.supabaseClient
+            .from('orders')
+            .select('*')
+            .eq('order_number', trackNum)
+            .single();
         
-        <div class="tracking-steps">
-            <div class="step ${stepStatus[0] ? 'completed' : ''}">
-                <div class="step-dot"></div>
-                <div class="step-label">Принят</div>
-            </div>
-            <div class="step ${stepStatus[1] ? 'completed' : ''}">
-                <div class="step-dot"></div>
-                <div class="step-label">На складе</div>
-            </div>
-            <div class="step ${stepStatus[2] ? 'active' : ''}">
-                <div class="step-dot"></div>
-                <div class="step-label">В пути</div>
-            </div>
-            <div class="step ${stepStatus[3] ? 'completed' : ''}">
-                <div class="step-dot"></div>
-                <div class="step-label">Доставлен</div>
-            </div>
-        </div>
+        const resultDiv = document.getElementById('trackingResult');
         
-        <div class="tracking-info">
-            <p><span class="material-icons">location_on</span> <b>Откуда:</b> ${order.from_address}</p>
-            <p><span class="material-icons">location_on</span> <b>Куда:</b> ${order.to_address}</p>
-            <p><span class="material-icons">schedule</span> <b>Дата заказа:</b> ${new Date(order.created_at).toLocaleDateString()}</p>
-            <p><span class="material-icons">inventory</span> <b>Тип груза:</b> ${order.cargo_type}</p>
-            <p><span class="material-icons">payments</span> <b>Стоимость:</b> ${order.price} ₽</p>
-        </div>
-    `
-}
+        if (error || !order) {
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div style="text-align:center; padding:20px;">Заказ не найден</div>';
+            return;
+        }
+        
+        // Определяем статус
+        const steps = {
+            'new': [true, false, false, false],
+            'processing': [true, true, false, false],
+            'delivered': [true, true, true, true],
+            'cancelled': [false, false, false, false]
+        };
+        
+        const status = order.status || 'new';
+        const stepStatus = steps[status] || steps.new;
+        
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `
+            <h4>Заказ № ${order.order_number}</h4>
+            
+            <div class="tracking-steps">
+                <div class="step ${stepStatus[0] ? 'completed' : ''}">
+                    <div class="step-dot"></div>
+                    <div class="step-label">Принят</div>
+                </div>
+                <div class="step ${stepStatus[1] ? 'completed' : ''}">
+                    <div class="step-dot"></div>
+                    <div class="step-label">На складе</div>
+                </div>
+                <div class="step ${stepStatus[2] ? 'active' : ''}">
+                    <div class="step-dot"></div>
+                    <div class="step-label">В пути</div>
+                </div>
+                <div class="step ${stepStatus[3] ? 'completed' : ''}">
+                    <div class="step-dot"></div>
+                    <div class="step-label">Доставлен</div>
+                </div>
+            </div>
+            
+            <div class="tracking-info">
+                <p><span class="material-icons">location_on</span> <b>Откуда:</b> ${order.from_address}</p>
+                <p><span class="material-icons">location_on</span> <b>Куда:</b> ${order.to_address}</p>
+                <p><span class="material-icons">schedule</span> <b>Дата заказа:</b> ${new Date(order.created_at).toLocaleDateString()}</p>
+                <p><span class="material-icons">inventory</span> <b>Тип груза:</b> ${order.cargo_type}</p>
+                <p><span class="material-icons">payments</span> <b>Стоимость:</b> ${order.price} ₽</p>
+            </div>
+        `;
+        
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message);
+    }
+};
 
-function repeatOrder(number) {
+window.repeatOrder = function(number) {
     if (confirm(`Повторить заказ №${number}?`)) {
-        window.location.href = `order.html?repeat=${number}`
+        window.location.href = `order.html?repeat=${number}`;
     }
-}
+};
 
 // ======================
-// ПЕРЕКЛЮЧЕНИЕ ТАБОВ
+// ПЕРЕКЛЮЧЕНИЕ ТАБОВ (ИСПРАВЛЕНО)
 // ======================
-function switchCabinetTab(tabName) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'))
+window.switchCabinetTab = function(tabName, element) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     
-    event.target.classList.add('active')
-    document.getElementById(tabName).classList.add('active')
-}
+    element.classList.add('active');
+    document.getElementById(tabName).classList.add('active');
+};
 
 // ======================
 // УВЕДОМЛЕНИЯ
 // ======================
 function showNotification(message) {
-    const notification = document.createElement('div')
-    notification.className = 'notification-popup'
-    notification.textContent = message
-    document.body.appendChild(notification)
+    const notification = document.createElement('div');
+    notification.className = 'notification-popup';
+    notification.textContent = message;
+    document.body.appendChild(notification);
     
     setTimeout(() => {
-        notification.remove()
-    }, 3000)
+        notification.remove();
+    }, 3000);
 }
 
 // ======================
 // ИНИЦИАЛИЗАЦИЯ
 // ======================
 document.addEventListener('DOMContentLoaded', function() {
-    checkSession()
+    console.log('Страница загружена');
+    
+    // Проверяем сессию
+    setTimeout(checkSession, 500);
     
     // Маска для телефона
-    const phoneInput = document.getElementById('profilePhone')
+    const phoneInput = document.getElementById('profilePhone');
     if(phoneInput) {
         phoneInput.addEventListener('input', function(e){
-            let x = e.target.value.replace(/\D/g,'').substring(0,11)
-            let f = '+7 '
-            if(x.length>1) f += '(' + x.substring(1,4)
-            if(x.length>=4) f += ') ' + x.substring(4,7)
-            if(x.length>=7) f += '-' + x.substring(7,9)
-            if(x.length>=9) f += '-' + x.substring(9,11)
-            e.target.value = f
-        })
+            let x = e.target.value.replace(/\D/g,'').substring(0,11);
+            let f = '+7 ';
+            if(x.length>1) f += '(' + x.substring(1,4);
+            if(x.length>=4) f += ') ' + x.substring(4,7);
+            if(x.length>=7) f += '-' + x.substring(7,9);
+            if(x.length>=9) f += '-' + x.substring(9,11);
+            e.target.value = f;
+        });
     }
-})
+});
 </script>
 </body>
 </html>
