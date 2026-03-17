@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
-    <!-- Supabase - ВАЖНО: загружаем ДО нашего кода -->
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -89,7 +89,7 @@
         
         /* Страница входа/регистрации */
         .auth-container{
-            max-width:400px;
+            max-width:450px;
             margin:50px auto;
             background:var(--card);
             border-radius:10px;
@@ -158,11 +158,16 @@
             font-weight:bold;
             font-size:16px;
             cursor:pointer;
-            margin:20px 0;
+            margin:10px 0;
         }
         
         .auth-btn:hover{
             opacity:0.9;
+        }
+        
+        .auth-btn:disabled{
+            opacity:0.5;
+            cursor:not-allowed;
         }
         
         .auth-error{
@@ -177,6 +182,63 @@
             font-size:14px;
             margin:10px 0;
             text-align:center;
+        }
+        
+        /* Индикатор надежности пароля */
+        .password-strength{
+            margin:10px 0;
+            height:5px;
+            border-radius:3px;
+            background:var(--border);
+            overflow:hidden;
+        }
+        
+        .strength-bar{
+            height:100%;
+            width:0;
+            transition:0.3s;
+        }
+        
+        .strength-weak{ background:#ff4444; width:25%; }
+        .strength-medium{ background:#ffa700; width:50%; }
+        .strength-good{ background:#ffd700; width:75%; }
+        .strength-strong{ background:#4CAF50; width:100%; }
+        
+        .strength-text{
+            font-size:12px;
+            text-align:right;
+            margin-top:5px;
+        }
+        
+        /* Капча */
+        .captcha-box{
+            background:var(--bg);
+            border-radius:6px;
+            padding:15px;
+            margin:15px 0;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+        
+        .captcha-image{
+            background:linear-gradient(45deg, #00aaff, #0066aa);
+            color:white;
+            padding:10px 20px;
+            border-radius:4px;
+            font-size:24px;
+            font-weight:bold;
+            letter-spacing:5px;
+            user-select:none;
+        }
+        
+        .captcha-input{
+            flex:1;
+        }
+        
+        .captcha-refresh{
+            cursor:pointer;
+            color:var(--accent);
         }
         
         /* Кабинет (после входа) */
@@ -563,52 +625,6 @@
             gap:10px;
         }
         
-        /* Уведомления */
-        .notifications-list{
-            margin-top:20px;
-        }
-        
-        .notification-item{
-            background:var(--card);
-            border-radius:8px;
-            padding:15px;
-            margin-bottom:10px;
-            display:flex;
-            align-items:center;
-            gap:15px;
-            border-left:4px solid transparent;
-        }
-        
-        .notification-item.unread{
-            border-left-color:var(--accent);
-            background:var(--bg);
-        }
-        
-        .notification-icon{
-            width:40px;
-            height:40px;
-            border-radius:50%;
-            background:var(--accent);
-            color:#fff;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-        }
-        
-        .notification-content{
-            flex:1;
-        }
-        
-        .notification-title{
-            font-weight:bold;
-            margin-bottom:5px;
-        }
-        
-        .notification-time{
-            font-size:12px;
-            opacity:0.5;
-        }
-        
         /* Загрузка */
         .loading{
             text-align:center;
@@ -692,23 +708,35 @@
         <!-- Форма входа -->
         <div id="loginForm" class="auth-form active">
             <h2>Вход в кабинет</h2>
-            <input type="email" id="loginEmail" placeholder="Email" value="test@example.com">
-            <input type="password" id="loginPassword" placeholder="Пароль" value="123456">
+            <input type="text" id="loginPhone" placeholder="Номер телефона" value="">
+            <input type="password" id="loginPassword" placeholder="Пароль" value="">
             <div id="loginError" class="auth-error"></div>
             <button class="auth-btn" onclick="window.handleLogin()">Войти</button>
-            <p style="text-align:center; opacity:0.7;">Тестовый аккаунт: test@example.com / 123456</p>
         </div>
         
         <!-- Форма регистрации -->
         <div id="registerForm" class="auth-form">
             <h2>Регистрация</h2>
-            <input type="text" id="registerName" placeholder="Имя">
-            <input type="email" id="registerEmail" placeholder="Email">
-            <input type="password" id="registerPassword" placeholder="Пароль (мин. 6 символов)">
-            <input type="password" id="registerConfirm" placeholder="Подтвердите пароль">
+            <input type="text" id="registerName" placeholder="Имя" value="">
+            <input type="text" id="registerPhone" placeholder="Номер телефона" value="">
+            <input type="password" id="registerPassword" placeholder="Пароль" value="">
+            
+            <!-- Индикатор надежности пароля -->
+            <div class="password-strength">
+                <div id="strengthBar" class="strength-bar"></div>
+            </div>
+            <div id="strengthText" class="strength-text"></div>
+            
+            <!-- Капча -->
+            <div class="captcha-box">
+                <div class="captcha-image" id="captchaImage">1234</div>
+                <input type="text" id="captchaInput" class="captcha-input" placeholder="Введите код">
+                <span class="material-icons captcha-refresh" onclick="window.refreshCaptcha()">refresh</span>
+            </div>
+            
             <div id="registerError" class="auth-error"></div>
             <div id="registerSuccess" class="auth-success"></div>
-            <button class="auth-btn" onclick="window.handleRegister()">Зарегистрироваться</button>
+            <button class="auth-btn" id="registerBtn" onclick="window.handleRegister()">Зарегистрироваться</button>
         </div>
     </div>
     
@@ -752,12 +780,12 @@
                     
                     <div class="profile-field">
                         <label>Email</label>
-                        <input type="email" id="profileEmail" value="" readonly style="background:var(--card);">
+                        <input type="email" id="profileEmail" value="" placeholder="не указан">
                     </div>
                     
                     <div class="profile-field">
                         <label>Телефон</label>
-                        <input type="tel" id="profilePhone" value="" placeholder="+7 (___) ___-__-__">
+                        <input type="tel" id="profilePhone" value="" readonly style="background:var(--card);">
                     </div>
                     
                     <button class="save-btn" onclick="window.saveProfile()">Сохранить изменения</button>
@@ -851,7 +879,7 @@ window.currentUser = null;
 })();
 
 // ======================
-// ТЕМА (ИСПРАВЛЕНО)
+// ТЕМА
 // ======================
 window.toggleTheme = function() {
     document.body.classList.toggle("dark");
@@ -860,7 +888,6 @@ window.toggleTheme = function() {
     if(themeIcon) {
         themeIcon.textContent = document.body.classList.contains("dark") ? 'light_mode' : 'dark_mode';
     }
-    console.log('Тема переключена');
 };
 
 // Загружаем сохраненную тему
@@ -873,7 +900,67 @@ window.toggleTheme = function() {
 })();
 
 // ======================
-// АВТОРИЗАЦИЯ (ИСПРАВЛЕНО)
+// ИНДИКАТОР НАДЕЖНОСТИ ПАРОЛЯ
+// ======================
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('registerPassword');
+    if(passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+            
+            // Оценка надежности
+            let strength = 0;
+            if(password.length >= 6) strength++;
+            if(password.length >= 8) strength++;
+            if(/[A-Z]/.test(password)) strength++;
+            if(/[0-9]/.test(password)) strength++;
+            if(/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            // Обновление индикатора
+            strengthBar.className = 'strength-bar';
+            if(password.length === 0) {
+                strengthBar.style.width = '0';
+                strengthText.textContent = '';
+            } else if(strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+                strengthText.textContent = 'Слабый пароль';
+                strengthText.style.color = '#ff4444';
+            } else if(strength <= 3) {
+                strengthBar.classList.add('strength-medium');
+                strengthText.textContent = 'Средний пароль';
+                strengthText.style.color = '#ffa700';
+            } else if(strength <= 4) {
+                strengthBar.classList.add('strength-good');
+                strengthText.textContent = 'Хороший пароль';
+                strengthText.style.color = '#ffd700';
+            } else {
+                strengthBar.classList.add('strength-strong');
+                strengthText.textContent = 'Надежный пароль';
+                strengthText.style.color = '#4CAF50';
+            }
+        });
+    }
+});
+
+// ======================
+// КАПЧА
+// ======================
+let currentCaptcha = '';
+
+window.refreshCaptcha = function() {
+    currentCaptcha = Math.floor(1000 + Math.random() * 9000).toString();
+    document.getElementById('captchaImage').textContent = currentCaptcha;
+};
+
+// Генерируем первую капчу
+setTimeout(() => {
+    window.refreshCaptcha();
+}, 100);
+
+// ======================
+// АВТОРИЗАЦИЯ
 // ======================
 
 // Проверяем сессию при загрузке
@@ -908,21 +995,42 @@ window.switchAuthTab = function(tab) {
     } else {
         document.querySelectorAll('.auth-tab')[1].classList.add('active');
         document.getElementById('registerForm').classList.add('active');
+        window.refreshCaptcha();
     }
 };
 
-// Вход
+// Форматирование телефона
+function formatPhone(phone) {
+    let x = phone.replace(/\D/g,'').substring(0,11);
+    if(x.length === 0) return '';
+    if(x[0] === '8') x = '7' + x.substring(1);
+    if(x[0] !== '7') x = '7' + x;
+    
+    let formatted = '+7';
+    if(x.length > 1) formatted += ' (' + x.substring(1,4);
+    if(x.length >= 4) formatted += ') ' + x.substring(4,7);
+    if(x.length >= 7) formatted += '-' + x.substring(7,9);
+    if(x.length >= 9) formatted += '-' + x.substring(9,11);
+    
+    return formatted;
+}
+
+// Вход по телефону
 window.handleLogin = async function() {
-    const email = document.getElementById('loginEmail').value;
+    const phone = document.getElementById('loginPhone').value;
     const password = document.getElementById('loginPassword').value;
     const errorDiv = document.getElementById('loginError');
     
     errorDiv.textContent = '';
     
-    if (!email || !password) {
+    if (!phone || !password) {
         errorDiv.textContent = 'Заполните все поля';
         return;
     }
+    
+    // Преобразуем телефон в email для Supabase
+    const cleanPhone = phone.replace(/\D/g,'');
+    const email = `${cleanPhone}@phone.transcargo.ru`;
     
     try {
         const { data, error } = await window.supabaseClient.auth.signInWithPassword({
@@ -938,24 +1046,32 @@ window.handleLogin = async function() {
         loadUserData();
         
     } catch (error) {
-        errorDiv.textContent = error.message;
+        errorDiv.textContent = 'Неверный телефон или пароль';
     }
 };
 
 // Регистрация
 window.handleRegister = async function() {
     const name = document.getElementById('registerName').value;
-    const email = document.getElementById('registerEmail').value;
+    const phone = document.getElementById('registerPhone').value;
     const password = document.getElementById('registerPassword').value;
-    const confirm = document.getElementById('registerConfirm').value;
+    const captcha = document.getElementById('captchaInput').value;
     const errorDiv = document.getElementById('registerError');
     const successDiv = document.getElementById('registerSuccess');
+    const registerBtn = document.getElementById('registerBtn');
     
     errorDiv.textContent = '';
     successDiv.textContent = '';
     
-    if (!name || !email || !password || !confirm) {
+    // Валидация
+    if (!name || !phone || !password || !captcha) {
         errorDiv.textContent = 'Заполните все поля';
+        return;
+    }
+    
+    const cleanPhone = phone.replace(/\D/g,'');
+    if (cleanPhone.length !== 11) {
+        errorDiv.textContent = 'Введите корректный номер телефона';
         return;
     }
     
@@ -964,34 +1080,67 @@ window.handleRegister = async function() {
         return;
     }
     
-    if (password !== confirm) {
-        errorDiv.textContent = 'Пароли не совпадают';
+    if (captcha !== currentCaptcha) {
+        errorDiv.textContent = 'Неверный код с картинки';
+        window.refreshCaptcha();
         return;
     }
     
+    registerBtn.disabled = true;
+    registerBtn.textContent = 'Регистрация...';
+    
     try {
+        // Используем телефон как email для Supabase
+        const email = `${cleanPhone}@phone.transcargo.ru`;
+        
         const { data, error } = await window.supabaseClient.auth.signUp({
             email: email,
             password: password,
             options: {
                 data: {
-                    full_name: name
+                    full_name: name,
+                    phone: formatPhone(cleanPhone)
                 }
             }
         });
         
         if (error) throw error;
         
-        successDiv.textContent = 'Регистрация успешна! Проверьте email для подтверждения.';
+        // Сразу создаем профиль
+        if (data.user) {
+            const { error: profileError } = await window.supabaseClient
+                .from('profiles')
+                .upsert({
+                    id: data.user.id,
+                    full_name: name,
+                    phone: formatPhone(cleanPhone),
+                    updated_at: new Date()
+                });
+            
+            if (profileError) console.error('Ошибка создания профиля:', profileError);
+        }
+        
+        successDiv.textContent = 'Регистрация успешна! Теперь вы можете войти.';
         
         // Очищаем форму
         document.getElementById('registerName').value = '';
-        document.getElementById('registerEmail').value = '';
+        document.getElementById('registerPhone').value = '';
         document.getElementById('registerPassword').value = '';
-        document.getElementById('registerConfirm').value = '';
+        document.getElementById('captchaInput').value = '';
+        document.getElementById('strengthBar').className = 'strength-bar';
+        document.getElementById('strengthText').textContent = '';
+        
+        // Переключаем на вкладку входа
+        setTimeout(() => {
+            window.switchAuthTab('login');
+        }, 2000);
         
     } catch (error) {
         errorDiv.textContent = error.message;
+    } finally {
+        registerBtn.disabled = false;
+        registerBtn.textContent = 'Зарегистрироваться';
+        window.refreshCaptcha();
     }
 };
 
@@ -1032,13 +1181,12 @@ async function loadUserData() {
             .single();
         
         if (profile) {
-            document.getElementById('userGreeting').textContent = `Здравствуйте, ${profile.full_name || window.currentUser.email}`;
+            document.getElementById('userGreeting').textContent = `Здравствуйте, ${profile.full_name || 'пользователь'}!`;
             document.getElementById('profileName').value = profile.full_name || '';
-            document.getElementById('profileEmail').value = window.currentUser.email;
-            document.getElementById('profilePhone').value = profile.phone || '';
+            document.getElementById('profilePhone').value = profile.phone || window.currentUser.email?.replace('@phone.transcargo.ru', '') || '';
+            document.getElementById('profileEmail').value = window.currentUser.email?.includes('@phone.transcargo.ru') ? '' : window.currentUser.email || '';
         } else {
-            document.getElementById('userGreeting').textContent = `Здравствуйте, ${window.currentUser.email}`;
-            document.getElementById('profileEmail').value = window.currentUser.email;
+            document.getElementById('userGreeting').textContent = `Здравствуйте, пользователь!`;
         }
         
         // Загружаем заказы
@@ -1125,7 +1273,11 @@ async function loadAddresses() {
             .eq('user_id', window.currentUser.id)
             .order('is_default', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+            console.error('Ошибка загрузки адресов:', error);
+            list.innerHTML = '<div style="text-align:center; padding:20px;">Ошибка загрузки адресов. Проверьте права доступа.</div>';
+            return;
+        }
         
         if (!addresses || addresses.length === 0) {
             list.innerHTML = '<div style="text-align:center; padding:20px;">У вас пока нет сохраненных адресов</div>';
@@ -1144,7 +1296,7 @@ async function loadAddresses() {
                 </div>
                 <div class="address-actions">
                     ${!addr.is_default ? `<button onclick="window.setDefaultAddress('${addr.id}')">★</button>` : ''}
-                    <button onclick="window.editAddress('${addr.id}', '${addr.address}')">✎</button>
+                    <button onclick="window.editAddress('${addr.id}', '${addr.address.replace(/'/g, "\\'")}')">✎</button>
                     <button onclick="window.deleteAddress('${addr.id}')">✕</button>
                 </div>
             `;
@@ -1152,6 +1304,7 @@ async function loadAddresses() {
         });
         
     } catch (error) {
+        console.error('Ошибка:', error);
         list.innerHTML = '<div style="text-align:center; padding:20px;">Ошибка загрузки адресов</div>';
     }
 }
@@ -1161,22 +1314,31 @@ async function loadAddresses() {
 // ======================
 window.saveProfile = async function() {
     const name = document.getElementById('profileName').value;
-    const phone = document.getElementById('profilePhone').value;
+    const email = document.getElementById('profileEmail').value;
     
     try {
-        const { error } = await window.supabaseClient
+        // Обновляем профиль
+        const { error: profileError } = await window.supabaseClient
             .from('profiles')
             .upsert({
                 id: window.currentUser.id,
                 full_name: name,
-                phone: phone,
+                email: email,
                 updated_at: new Date()
             });
         
-        if (error) throw error;
+        if (profileError) throw profileError;
+        
+        // Если email изменился и это не телефонный, обновляем в auth
+        if (email && !email.includes('@phone.transcargo.ru')) {
+            const { error: emailError } = await window.supabaseClient.auth.updateUser({
+                email: email
+            });
+            if (emailError) console.error('Ошибка обновления email:', emailError);
+        }
         
         showNotification('Данные сохранены');
-        document.getElementById('userGreeting').textContent = `Здравствуйте, ${name || window.currentUser.email}`;
+        document.getElementById('userGreeting').textContent = `Здравствуйте, ${name || 'пользователь'}!`;
         
     } catch (error) {
         showNotification('Ошибка при сохранении: ' + error.message);
@@ -1219,27 +1381,47 @@ window.changePassword = async function() {
 };
 
 // ======================
-// ДЕЙСТВИЯ С АДРЕСАМИ
+// ДЕЙСТВИЯ С АДРЕСАМИ (ИСПРАВЛЕНО)
 // ======================
 window.addAddress = async function() {
     const newAddr = prompt('Введите новый адрес:');
     if (!newAddr) return;
     
     try {
+        // Проверяем, есть ли уже адреса
+        const { data: existing, error: checkError } = await window.supabaseClient
+            .from('addresses')
+            .select('id')
+            .eq('user_id', window.currentUser.id);
+        
+        if (checkError) throw checkError;
+        
+        // Если это первый адрес, делаем его по умолчанию
+        const isDefault = !existing || existing.length === 0;
+        
         const { error } = await window.supabaseClient
             .from('addresses')
             .insert({
                 user_id: window.currentUser.id,
                 address: newAddr,
-                is_default: false
+                is_default: isDefault
             });
         
-        if (error) throw error;
+        if (error) {
+            console.error('Ошибка SQL:', error);
+            if (error.message.includes('row-level security')) {
+                showNotification('Ошибка прав доступа. Проверьте настройки Supabase.');
+            } else {
+                showNotification('Ошибка при добавлении: ' + error.message);
+            }
+            return;
+        }
         
         showNotification('Адрес добавлен');
         loadAddresses();
         
     } catch (error) {
+        console.error('Ошибка:', error);
         showNotification('Ошибка при добавлении: ' + error.message);
     }
 };
@@ -1247,10 +1429,12 @@ window.addAddress = async function() {
 window.setDefaultAddress = async function(id) {
     try {
         // Сначала сбрасываем все адреса
-        await window.supabaseClient
+        const { error: resetError } = await window.supabaseClient
             .from('addresses')
             .update({ is_default: false })
             .eq('user_id', window.currentUser.id);
+        
+        if (resetError) throw resetError;
         
         // Устанавливаем новый по умолчанию
         const { error } = await window.supabaseClient
@@ -1292,6 +1476,21 @@ window.deleteAddress = async function(id) {
     if (!confirm('Удалить адрес?')) return;
     
     try {
+        // Проверяем, не является ли адрес используемым в заказах
+        const { data: orders, error: checkError } = await window.supabaseClient
+            .from('orders')
+            .select('id')
+            .eq('user_id', window.currentUser.id)
+            .or(`from_address.ilike.%${id}%,to_address.ilike.%${id}%`);
+        
+        if (checkError) throw checkError;
+        
+        if (orders && orders.length > 0) {
+            if (!confirm('Этот адрес используется в заказах. Всё равно удалить?')) {
+                return;
+            }
+        }
+        
         const { error } = await window.supabaseClient
             .from('addresses')
             .delete()
@@ -1388,7 +1587,7 @@ window.repeatOrder = function(number) {
 };
 
 // ======================
-// ПЕРЕКЛЮЧЕНИЕ ТАБОВ (ИСПРАВЛЕНО)
+// ПЕРЕКЛЮЧЕНИЕ ТАБОВ
 // ======================
 window.switchCabinetTab = function(tabName, element) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1421,19 +1620,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Проверяем сессию
     setTimeout(checkSession, 500);
     
-    // Маска для телефона
-    const phoneInput = document.getElementById('profilePhone');
-    if(phoneInput) {
-        phoneInput.addEventListener('input', function(e){
-            let x = e.target.value.replace(/\D/g,'').substring(0,11);
-            let f = '+7 ';
-            if(x.length>1) f += '(' + x.substring(1,4);
-            if(x.length>=4) f += ') ' + x.substring(4,7);
-            if(x.length>=7) f += '-' + x.substring(7,9);
-            if(x.length>=9) f += '-' + x.substring(9,11);
-            e.target.value = f;
-        });
-    }
+    // Маска для телефона в регистрации
+    const phoneInputs = ['registerPhone', 'loginPhone'];
+    phoneInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if(input) {
+            input.addEventListener('input', function(e){
+                let x = e.target.value.replace(/\D/g,'').substring(0,11);
+                if(x.length === 0) {
+                    e.target.value = '';
+                    return;
+                }
+                if(x[0] === '8') x = '7' + x.substring(1);
+                if(x[0] !== '7') x = '7' + x;
+                
+                let formatted = '+7';
+                if(x.length > 1) formatted += ' (' + x.substring(1,4);
+                if(x.length >= 4) formatted += ') ' + x.substring(4,7);
+                if(x.length >= 7) formatted += '-' + x.substring(7,9);
+                if(x.length >= 9) formatted += '-' + x.substring(9,11);
+                
+                e.target.value = formatted;
+            });
+        }
+    });
 });
 </script>
 </body>
