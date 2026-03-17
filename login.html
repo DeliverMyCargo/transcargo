@@ -1093,6 +1093,7 @@ window.handleRegister = async function() {
         // Используем телефон как email для Supabase
         const email = `${cleanPhone}@phone.transcargo.ru`;
         
+        // 1. Регистрируем пользователя
         const { data, error } = await window.supabaseClient.auth.signUp({
             email: email,
             password: password,
@@ -1106,7 +1107,7 @@ window.handleRegister = async function() {
         
         if (error) throw error;
         
-        // Сразу создаем профиль
+        // 2. Создаем профиль
         if (data.user) {
             const { error: profileError } = await window.supabaseClient
                 .from('profiles')
@@ -1120,7 +1121,29 @@ window.handleRegister = async function() {
             if (profileError) console.error('Ошибка создания профиля:', profileError);
         }
         
-        successDiv.textContent = 'Регистрация успешна! Теперь вы можете войти.';
+        // 3. Генерируем и сохраняем код подтверждения
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date();
+        expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+        
+        const { error: codeError } = await window.supabaseClient
+            .from('verification_codes')
+            .insert({
+                phone: formatPhone(cleanPhone),
+                code: code,
+                expires_at: expiresAt.toISOString()
+            });
+        
+        if (codeError) {
+            console.error('Ошибка сохранения кода:', codeError);
+        }
+        
+        // 4. Показываем успех и код
+        successDiv.innerHTML = `
+            ✅ Регистрация успешна!<br>
+            📱 Ваш код: <strong>${code}</strong><br>
+            🤖 Отправьте этот код боту @FurtherWindBot
+        `;
         
         // Очищаем форму
         document.getElementById('registerName').value = '';
@@ -1130,10 +1153,10 @@ window.handleRegister = async function() {
         document.getElementById('strengthBar').className = 'strength-bar';
         document.getElementById('strengthText').textContent = '';
         
-        // Переключаем на вкладку входа
+        // Переключаем на вкладку входа через 5 секунд
         setTimeout(() => {
             window.switchAuthTab('login');
-        }, 2000);
+        }, 5000);
         
     } catch (error) {
         errorDiv.textContent = error.message;
