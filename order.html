@@ -144,16 +144,47 @@
         .option:hover{transform:translateY(-2px);}
         .option.active{border-color:var(--accent);background:var(--accent);color:#fff;}
         
-        /* Таблица цен */
+        /* Таблица цен с подсказками */
         .price-table{
             width:100%;border-collapse:collapse;margin:20px 0;
             background:var(--card);border-radius:10px;overflow:hidden;
         }
         .price-table th, .price-table td{
             padding:12px;text-align:left;border-bottom:1px solid var(--border);
+            position:relative;
         }
         .price-table th{background:var(--accent);color:#fff;}
         .price-table tr:hover{background:var(--bg);}
+        
+        .price-hint{
+            position:relative;
+            cursor:help;
+            border-bottom:1px dotted var(--accent);
+        }
+        
+        .price-hint .hint-text{
+            visibility:hidden;
+            position:absolute;
+            bottom:100%;
+            left:50%;
+            transform:translateX(-50%);
+            background:#333;
+            color:#fff;
+            padding:8px 12px;
+            border-radius:6px;
+            font-size:12px;
+            white-space:nowrap;
+            opacity:0;
+            transition:0.3s;
+            pointer-events:none;
+            z-index:100;
+            margin-bottom:5px;
+        }
+        
+        .price-hint:hover .hint-text{
+            visibility:visible;
+            opacity:1;
+        }
         
         /* Инфо о компании */
         .company-info{
@@ -399,7 +430,7 @@
             <div class="option" onclick="toggleOption(this,'documents')">Документы (+300₽)</div>
         </div>
         
-        <!-- Таблица цен для международной доставки -->
+        <!-- Таблица цен для международной доставки (фиксированные цены) -->
         <h3>🌍 Цены на международную доставку</h3>
         <table class="price-table">
             <tr>
@@ -410,46 +441,46 @@
                 <th>Груз (до 10 кг)</th>
             </tr>
             <tr>
-                <td>Беларусь</td>
-                <td>300₽</td>
-                <td>500₽</td>
-                <td>800₽</td>
-                <td>1200₽</td>
+                <td>🇧🇾 Беларусь</td>
+                <td class="price-hint">300₽ <span class="hint-text">Взятие: 100₽ + Вес: 60₽ + Доставка: 140₽</span></td>
+                <td class="price-hint">500₽ <span class="hint-text">Взятие: 100₽ + Вес: 120₽ + Доставка: 280₽</span></td>
+                <td class="price-hint">800₽ <span class="hint-text">Взятие: 100₽ + Вес: 300₽ + Доставка: 400₽</span></td>
+                <td class="price-hint">1200₽ <span class="hint-text">Взятие: 100₽ + Вес: 600₽ + Доставка: 500₽</span></td>
             </tr>
             <tr>
-                <td>Казахстан</td>
-                <td>350₽</td>
-                <td>600₽</td>
-                <td>900₽</td>
-                <td>1500₽</td>
+                <td>🇰🇿 Казахстан</td>
+                <td class="price-hint">350₽ <span class="hint-text">Взятие: 100₽ + Вес: 60₽ + Доставка: 190₽</span></td>
+                <td class="price-hint">600₽ <span class="hint-text">Взятие: 100₽ + Вес: 120₽ + Доставка: 380₽</span></td>
+                <td class="price-hint">900₽ <span class="hint-text">Взятие: 100₽ + Вес: 300₽ + Доставка: 500₽</span></td>
+                <td class="price-hint">1500₽ <span class="hint-text">Взятие: 100₽ + Вес: 600₽ + Доставка: 800₽</span></td>
             </tr>
             <tr>
-                <td>Китай</td>
-                <td>500₽</td>
-                <td>900₽</td>
-                <td>1500₽</td>
-                <td>2500₽</td>
+                <td>🇨🇳 Китай</td>
+                <td class="price-hint">500₽ <span class="hint-text">Взятие: 100₽ + Вес: 60₽ + Доставка: 340₽</span></td>
+                <td class="price-hint">900₽ <span class="hint-text">Взятие: 100₽ + Вес: 120₽ + Доставка: 680₽</span></td>
+                <td class="price-hint">1500₽ <span class="hint-text">Взятие: 100₽ + Вес: 300₽ + Доставка: 1100₽</span></td>
+                <td class="price-hint">2500₽ <span class="hint-text">Взятие: 100₽ + Вес: 600₽ + Доставка: 1800₽</span></td>
             </tr>
             <tr>
-                <td>Турция</td>
-                <td>450₽</td>
-                <td>800₽</td>
-                <td>1300₽</td>
-                <td>2000₽</td>
+                <td>🇹🇷 Турция</td>
+                <td class="price-hint">450₽ <span class="hint-text">Взятие: 100₽ + Вес: 60₽ + Доставка: 290₽</span></td>
+                <td class="price-hint">800₽ <span class="hint-text">Взятие: 100₽ + Вес: 120₽ + Доставка: 580₽</span></td>
+                <td class="price-hint">1300₽ <span class="hint-text">Взятие: 100₽ + Вес: 300₽ + Доставка: 900₽</span></td>
+                <td class="price-hint">2000₽ <span class="hint-text">Взятие: 100₽ + Вес: 600₽ + Доставка: 1300₽</span></td>
             </tr>
             <tr>
-                <td>Европа</td>
-                <td>600₽</td>
-                <td>1000₽</td>
-                <td>1800₽</td>
-                <td>3000₽</td>
+                <td>🇪🇺 Европа</td>
+                <td class="price-hint">600₽ <span class="hint-text">Взятие: 100₽ + Вес: 60₽ + Доставка: 440₽</span></td>
+                <td class="price-hint">1000₽ <span class="hint-text">Взятие: 100₽ + Вес: 120₽ + Доставка: 780₽</span></td>
+                <td class="price-hint">1800₽ <span class="hint-text">Взятие: 100₽ + Вес: 300₽ + Доставка: 1400₽</span></td>
+                <td class="price-hint">3000₽ <span class="hint-text">Взятие: 100₽ + Вес: 600₽ + Доставка: 2300₽</span></td>
             </tr>
             <tr>
-                <td>США</td>
-                <td>800₽</td>
-                <td>1500₽</td>
-                <td>2500₽</td>
-                <td>4000₽</td>
+                <td>🇺🇸 США</td>
+                <td class="price-hint">800₽ <span class="hint-text">Взятие: 100₽ + Вес: 60₽ + Доставка: 640₽</span></td>
+                <td class="price-hint">1500₽ <span class="hint-text">Взятие: 100₽ + Вес: 120₽ + Доставка: 1280₽</span></td>
+                <td class="price-hint">2500₽ <span class="hint-text">Взятие: 100₽ + Вес: 300₽ + Доставка: 2100₽</span></td>
+                <td class="price-hint">4000₽ <span class="hint-text">Взятие: 100₽ + Вес: 600₽ + Доставка: 3300₽</span></td>
             </tr>
         </table>
         
@@ -760,7 +791,7 @@ function toggleOption(el, id){
 }
 
 /* ======================
-   РАСЧЕТ СТОИМОСТИ (НОВЫЕ ФОРМУЛЫ)
+   РАСЧЕТ СТОИМОСТИ
 ====================== */
 function calculateOrder(){
     if(!selectedCargo){
@@ -833,7 +864,6 @@ function calculateOrder(){
         
     } else if(selectedCargo.type === 'move'){
         // Переезд: 1500 машина + 60р/км в городе, 150р/км за городом
-        // Упрощенно: считаем что до 50км - город, дальше - межгород
         if(distance <= 50){
             price = 1500 + (distance * 60);
             details = [`Машина: 1500₽`, `В городе: ${Math.round(distance*60)}₽`];
