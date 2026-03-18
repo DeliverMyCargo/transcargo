@@ -1014,36 +1014,22 @@ function formatPhone(phone) {
     return formatted;
 }
 
-// Вход по телефону
-window.handleLogin = async function() {
+// Вход через localStorage (без Supabase Auth)
+window.handleLogin = function() {
     const phone = document.getElementById('loginPhone').value;
     const password = document.getElementById('loginPassword').value;
     const errorDiv = document.getElementById('loginError');
     
-    errorDiv.textContent = '';
-    
-    if (!phone || !password) {
-        errorDiv.textContent = 'Заполните все поля';
-        return;
-    }
-    
     const cleanPhone = phone.replace(/\D/g,'');
-    const email = `${cleanPhone}@temp.furtherwind.ru`;
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const user = users.find(u => u.phone === cleanPhone && u.password === password);
     
-    try {
-        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-        
-        if (error) throw error;
-        
-        window.currentUser = data.user;
-        showNotification('Успешный вход!');
-        showCabinet();
-        loadUserData();
-        
-    } catch (error) {
+    if (user) {
+        showNotification('Вход выполнен!');
+        document.getElementById('authContainer').style.display = 'none';
+        document.getElementById('cabinetContainer').style.display = 'block';
+        document.getElementById('userGreeting').textContent = `Здравствуйте, ${user.name}!`;
+    } else {
         errorDiv.textContent = 'Неверный телефон или пароль';
     }
 };
