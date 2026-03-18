@@ -1062,7 +1062,6 @@ window.handleRegister = async function() {
     errorDiv.textContent = '';
     successDiv.textContent = '';
     
-    // Валидация
     if (!name || !phone || !password || !captcha) {
         errorDiv.textContent = 'Заполните все поля';
         return;
@@ -1089,68 +1088,34 @@ window.handleRegister = async function() {
     registerBtn.textContent = 'Регистрация...';
     
     try {
-        // Используем телефон как email для Supabase
-        const email = `${cleanPhone}@temp.furtherwind.ru`;
-        
-        // 1. Регистрируем пользователя
-        const { data, error } = await window.supabaseClient.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: {
-                    full_name: name,
-                    phone: formatPhone(cleanPhone)
-                }
-            }
-        });
-        
-        if (error) throw error;
-        
-        // 2. Генерируем 6-значный код
+        // 1. Генерируем код
         const code = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiresAt = new Date();
-        expiresAt.setMinutes(expiresAt.getMinutes() + 10);
         
-        // 3. Сохраняем код в БД (на всякий случай)
-        try {
-            await window.supabaseClient
-                .from('verification_codes')
-                .insert({
-                    phone: formatPhone(cleanPhone),
-                    code: code,
-                    expires_at: expiresAt.toISOString()
-                });
-        } catch (e) {
-            console.log('БД не сохранила, но код покажем:', e);
-        }
+        // 2. Сохраняем в localStorage (временное хранилище)
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        users.push({
+            name: name,
+            phone: cleanPhone,
+            password: password,
+            code: code,
+            expiresAt: Date.now() + 10 * 60 * 1000 // 10 минут
+        });
+        localStorage.setItem('users', JSON.stringify(users));
         
-        // 4. ПОКАЗЫВАЕМ КОД ПОЛЬЗОВАТЕЛЮ
+        // 3. ПОКАЗЫВАЕМ КОД
         successDiv.innerHTML = `
             <div style="text-align: center; padding: 15px;">
-                <div style="font-size: 14px; color: #666; margin-bottom: 10px;">✅ Регистрация успешна!</div>
-                <div style="font-size: 12px; color: #888; margin-bottom: 5px;">Ваш код подтверждения:</div>
-                <div style="
-                    font-size: 42px; 
-                    font-weight: bold; 
-                    letter-spacing: 8px;
-                    color: #00aaff;
-                    background: var(--bg);
-                    padding: 15px;
-                    border-radius: 10px;
-                    margin: 15px 0;
-                    border: 2px dashed var(--accent);
-                    font-family: monospace;
-                ">${code}</div>
-                <div style="font-size: 13px; color: #ff4444; margin: 10px 0;">
-                    ⚠️ Код действителен 10 минут
+                <div style="font-size: 14px; color: #666;">✅ Регистрация успешна!</div>
+                <div style="font-size: 42px; font-weight: bold; letter-spacing: 8px; color: #00aaff; 
+                    background: var(--bg); padding: 15px; border-radius: 10px; margin: 15px 0;
+                    border: 2px dashed var(--accent); font-family: monospace;">
+                    ${code}
                 </div>
-                <div style="font-size: 14px; margin-top: 15px;">
-                    Введите этот код в поле ниже или нажмите кнопку "Скопировать"
-                </div>
+                <div style="font-size: 13px; color: #ff4444;">⚠️ Код действителен 10 минут</div>
             </div>
         `;
         
-        // 5. Добавляем поле для ввода кода и кнопку копирования
+        // 4. Поле для ввода кода
         const codeInput = document.createElement('input');
         codeInput.id = 'verificationCode';
         codeInput.type = 'text';
@@ -1162,47 +1127,33 @@ window.handleRegister = async function() {
         codeInput.style.textAlign = 'center';
         codeInput.style.letterSpacing = '3px';
         
-        const copyButton = document.createElement('button');
-        copyButton.textContent = '📋 Скопировать код';
-        copyButton.className = 'auth-btn';
-        copyButton.style.marginTop = '10px';
-        copyButton.style.background = '#666';
-        copyButton.onclick = () => {
-            navigator.clipboard.writeText(code).then(() => {
-                alert('Код скопирован!');
-            });
-        };
-        
         const verifyButton = document.createElement('button');
-        verifyButton.textContent = '✅ Подтвердить код';
+        verifyButton.textContent = '✅ Подтвердить';
         verifyButton.className = 'auth-btn';
-        verifyButton.style.marginTop = '10px';
         verifyButton.onclick = () => {
             const userCode = document.getElementById('verificationCode').value;
-            if (userCode === code) {
+            const stored = JSON.parse(localStorage.getItem('users') || '[]')
+                .find(u => u.phone === cleanPhone && u.code === userCode && u.expiresAt > Date.now());
+            
+            if (stored) {
                 successDiv.innerHTML = `
                     <div style="text-align: center; color: #4CAF50; padding: 20px;">
                         <span style="font-size: 48px;">✅</span>
                         <h3>Телефон подтвержден!</h3>
-                        <p>Теперь вы можете войти в кабинет</p>
+                        <p>Теперь вы можете войти</p>
                     </div>
                 `;
-                // Переключаем на вход через 2 секунды
                 setTimeout(() => window.switchAuthTab('login'), 2000);
             } else {
-                alert('Неверный код');
+                alert('Неверный код или истек срок');
             }
         };
         
-        // Добавляем всё на страницу
         document.getElementById('registerForm').appendChild(codeInput);
-        document.getElementById('registerForm').appendChild(copyButton);
         document.getElementById('registerForm').appendChild(verifyButton);
-        
-        // Прячем кнопку регистрации
         registerBtn.style.display = 'none';
         
-        // Очищаем другие поля
+        // Очищаем поля
         document.getElementById('registerName').value = '';
         document.getElementById('registerPhone').value = '';
         document.getElementById('registerPassword').value = '';
@@ -1210,9 +1161,11 @@ window.handleRegister = async function() {
         
     } catch (error) {
         errorDiv.textContent = error.message;
+    } finally {
         registerBtn.disabled = false;
         registerBtn.textContent = 'Зарегистрироваться';
     }
+};
 };
 // Выход
 window.handleLogout = async function() {
