@@ -1027,9 +1027,8 @@ window.handleLogin = async function() {
         return;
     }
     
-    // Преобразуем телефон в email для Supabase
     const cleanPhone = phone.replace(/\D/g,'');
-    const email = `${cleanPhone}@phone.transcargo.ru`;
+    const email = `${cleanPhone}@temp.furtherwind.ru`;
     
     try {
         const { data, error } = await window.supabaseClient.auth.signInWithPassword({
@@ -1049,7 +1048,7 @@ window.handleLogin = async function() {
     }
 };
 
-// Регистрация с отображением кода на экране
+// Регистрация
 window.handleRegister = async function() {
     const name = document.getElementById('registerName').value;
     const phone = document.getElementById('registerPhone').value;
@@ -1088,21 +1087,50 @@ window.handleRegister = async function() {
     registerBtn.textContent = 'Регистрация...';
     
     try {
-        // 1. Генерируем код
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        // 1. Регистрируем пользователя в Supabase
+        const email = `${cleanPhone}@temp.furtherwind.ru`; // временный email для Supabase
         
-        // 2. Сохраняем в localStorage (временное хранилище)
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        users.push({
-            name: name,
-            phone: cleanPhone,
+        const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+            email: email,
             password: password,
-            code: code,
-            expiresAt: Date.now() + 10 * 60 * 1000 // 10 минут
+            options: {
+                data: {
+                    full_name: name,
+                    phone: cleanPhone
+                }
+            }
         });
-        localStorage.setItem('users', JSON.stringify(users));
         
-        // 3. ПОКАЗЫВАЕМ КОД
+        if (authError) throw authError;
+        
+        // 2. Создаем профиль в таблице profiles
+        const { error: profileError } = await window.supabaseClient
+            .from('profiles')
+            .insert({
+                id: authData.user.id,
+                full_name: name,
+                phone: cleanPhone,
+                created_at: new Date()
+            });
+        
+        if (profileError) console.error('Ошибка создания профиля:', profileError);
+        
+        // 3. Генерируем код
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date();
+        expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+        
+        // 4. Сохраняем код в verification_codes
+        await window.supabaseClient
+            .from('verification_codes')
+            .insert({
+                phone: cleanPhone,
+                code: code,
+                expires_at: expiresAt.toISOString(),
+                is_used: false
+            });
+        
+        // 5. ПОКАЗЫВАЕМ КОД
         successDiv.innerHTML = `
             <div style="text-align: center; padding: 15px;">
                 <div style="font-size: 14px; color: #666;">✅ Регистрация успешна!</div>
@@ -1115,7 +1143,7 @@ window.handleRegister = async function() {
             </div>
         `;
         
-        // 4. Поле для ввода кода
+        // 6. Поле для ввода кода
         const codeInput = document.createElement('input');
         codeInput.id = 'verificationCode';
         codeInput.type = 'text';
@@ -1130,12 +1158,26 @@ window.handleRegister = async function() {
         const verifyButton = document.createElement('button');
         verifyButton.textContent = '✅ Подтвердить';
         verifyButton.className = 'auth-btn';
-        verifyButton.onclick = () => {
+        verifyButton.onclick = async () => {
             const userCode = document.getElementById('verificationCode').value;
-            const stored = JSON.parse(localStorage.getItem('users') || '[]')
-                .find(u => u.phone === cleanPhone && u.code === userCode && u.expiresAt > Date.now());
             
-            if (stored) {
+            // Проверяем код в Supabase
+            const { data: codeData, error: codeError } = await window.supabaseClient
+                .from('verification_codes')
+                .select('*')
+                .eq('phone', cleanPhone)
+                .eq('code', userCode)
+                .eq('is_used', false)
+                .gte('expires_at', new Date().toISOString())
+                .single();
+            
+            if (codeData) {
+                // Помечаем код как использованный
+                await window.supabaseClient
+                    .from('verification_codes')
+                    .update({ is_used: true })
+                    .eq('id', codeData.id);
+                
                 successDiv.innerHTML = `
                     <div style="text-align: center; color: #4CAF50; padding: 20px;">
                         <span style="font-size: 48px;">✅</span>
