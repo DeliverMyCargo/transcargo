@@ -1034,7 +1034,14 @@ window.handleLogin = function() {
     }
 };
 
-// Регистрация
+<script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.1/dist/pocketbase.umd.js"></script>
+<script>
+const pb = new PocketBase('http://127.0.0.1:8090');
+const COLLECTION = 'UsersFurtherWind';
+
+// ======================
+// РЕГИСТРАЦИЯ
+// ======================
 window.handleRegister = async function() {
     const name = document.getElementById('registerName').value;
     const phone = document.getElementById('registerPhone').value;
@@ -1073,50 +1080,31 @@ window.handleRegister = async function() {
     registerBtn.textContent = 'Регистрация...';
     
     try {
-        // 1. Регистрируем пользователя в Supabase
-        const email = `${cleanPhone}@temp.furtherwind.ru`; // временный email для Supabase
-        
-        const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: {
-                    full_name: name,
-                    phone: cleanPhone
-                }
-            }
+        // Проверяем, нет ли уже такого телефона
+        const existing = await pb.collection(COLLECTION).getList(1, 1, {
+            filter: `phone = "${cleanPhone}"`
         });
         
-        if (authError) throw authError;
+        if (existing.items.length > 0) {
+            errorDiv.textContent = 'Пользователь с таким номером уже существует';
+            return;
+        }
         
-        // 2. Создаем профиль в таблице profiles
-        const { error: profileError } = await window.supabaseClient
-            .from('profiles')
-            .insert({
-                id: authData.user.id,
-                full_name: name,
-                phone: cleanPhone,
-                created_at: new Date()
-            });
-        
-        if (profileError) console.error('Ошибка создания профиля:', profileError);
-        
-        // 3. Генерируем код
+        // Генерируем код
         const code = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiresAt = new Date();
-        expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+        const expiresAt = Date.now() + 10 * 60 * 1000;
         
-        // 4. Сохраняем код в verification_codes
-        await window.supabaseClient
-            .from('verification_codes')
-            .insert({
-                phone: cleanPhone,
-                code: code,
-                expires_at: expiresAt.toISOString(),
-                is_used: false
-            });
+        // Создаём пользователя
+        await pb.collection(COLLECTION).create({
+            name: name,
+            phone: cleanPhone,
+            password: password,
+            code: code,
+            code_expires: expiresAt,
+            verified: false
+        });
         
-        // 5. ПОКАЗЫВАЕМ КОД
+        // ПОКАЗЫВАЕМ КОД
         successDiv.innerHTML = `
             <div style="text-align: center; padding: 15px;">
                 <div style="font-size: 14px; color: #666;">✅ Регистрация успешна!</div>
@@ -1129,7 +1117,7 @@ window.handleRegister = async function() {
             </div>
         `;
         
-        // 6. Поле для ввода кода
+        // Поле для ввода кода
         const codeInput = document.createElement('input');
         codeInput.id = 'verificationCode';
         codeInput.type = 'text';
@@ -1139,7 +1127,6 @@ window.handleRegister = async function() {
         codeInput.style.padding = '12px';
         codeInput.style.fontSize = '18px';
         codeInput.style.textAlign = 'center';
-        codeInput.style.letterSpacing = '3px';
         
         const verifyButton = document.createElement('button');
         verifyButton.textContent = '✅ Подтвердить';
@@ -1147,22 +1134,19 @@ window.handleRegister = async function() {
         verifyButton.onclick = async () => {
             const userCode = document.getElementById('verificationCode').value;
             
-            // Проверяем код в Supabase
-            const { data: codeData, error: codeError } = await window.supabaseClient
-                .from('verification_codes')
-                .select('*')
-                .eq('phone', cleanPhone)
-                .eq('code', userCode)
-                .eq('is_used', false)
-                .gte('expires_at', new Date().toISOString())
-                .single();
+            // Ищем пользователя по коду
+            const result = await pb.collection(COLLECTION).getList(1, 1, {
+                filter: `phone = "${cleanPhone}" && code = "${userCode}" && code_expires > ${Date.now()}`
+            });
             
-            if (codeData) {
-                // Помечаем код как использованный
-                await window.supabaseClient
-                    .from('verification_codes')
-                    .update({ is_used: true })
-                    .eq('id', codeData.id);
+            if (result.items.length > 0) {
+                const user = result.items[0];
+                // Подтверждаем
+                await pb.collection(COLLECTION).update(user.id, {
+                    verified: true,
+                    code: null,
+                    code_expires: null
+                });
                 
                 successDiv.innerHTML = `
                     <div style="text-align: center; color: #4CAF50; padding: 20px;">
@@ -1181,12 +1165,6 @@ window.handleRegister = async function() {
         document.getElementById('registerForm').appendChild(verifyButton);
         registerBtn.style.display = 'none';
         
-        // Очищаем поля
-        document.getElementById('registerName').value = '';
-        document.getElementById('registerPhone').value = '';
-        document.getElementById('registerPassword').value = '';
-        document.getElementById('captchaInput').value = '';
-        
     } catch (error) {
         errorDiv.textContent = error.message;
     } finally {
@@ -1195,21 +1173,89 @@ window.handleRegister = async function() {
     }
 };
 
-// Выход
-window.handleLogout = async function() {
+// ======================
+// ВХОД
+// ======================
+window.handleLogin = async function() {
+    const phone = document.getElementById('loginPhone').value;
+    const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('loginError');
+    
+    errorDiv.textContent = '';
+    
+    if (!phone || !password) {
+        errorDiv.textContent = 'Заполните все поля';
+        return;
+    }
+    
+    const cleanPhone = phone.replace(/\D/g,'');
+    
     try {
-        const { error } = await window.supabaseClient.auth.signOut();
-        if (error) throw error;
+        // Ищем пользователя с таким телефоном и паролем
+        const result = await pb.collection(COLLECTION).getList(1, 1, {
+            filter: `phone = "${cleanPhone}" && password = "${password}" && verified = true`
+        });
         
-        window.currentUser = null;
-        document.getElementById('authContainer').style.display = 'block';
-        document.getElementById('cabinetContainer').style.display = 'none';
-        showNotification('Вы вышли из системы');
-        
+        if (result.items.length > 0) {
+            const user = result.items[0];
+            localStorage.setItem('currentUser', JSON.stringify({
+                id: user.id,
+                name: user.name,
+                phone: user.phone
+            }));
+            
+            showNotification('Успешный вход!');
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('cabinetContainer').style.display = 'block';
+            document.getElementById('userGreeting').textContent = `Здравствуйте, ${user.name}!`;
+            
+            loadUserData();
+        } else {
+            errorDiv.textContent = 'Неверный телефон или пароль';
+        }
     } catch (error) {
-        showNotification('Ошибка при выходе: ' + error.message);
+        console.error(error);
+        errorDiv.textContent = 'Ошибка подключения к базе';
     }
 };
+
+// ======================
+// ВЫХОД
+// ======================
+window.handleLogout = function() {
+    localStorage.removeItem('currentUser');
+    document.getElementById('authContainer').style.display = 'block';
+    document.getElementById('cabinetContainer').style.display = 'none';
+    showNotification('Вы вышли из системы');
+};
+
+// ======================
+// ЗАГРУЗКА ДАННЫХ
+// ======================
+function loadUserData() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    document.getElementById('profileName').value = currentUser.name || '';
+    document.getElementById('profilePhone').value = currentUser.phone || '';
+    
+    document.getElementById('ordersGrid').innerHTML = `
+        <div style="text-align:center; padding:20px;">У вас пока нет заказов</div>
+    `;
+    document.getElementById('addressesList').innerHTML = `
+        <div style="text-align:center; padding:20px;">У вас пока нет сохраненных адресов</div>
+    `;
+}
+
+// ======================
+// УВЕДОМЛЕНИЯ
+// ======================
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification-popup';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+}
+</script>
 
 // Показать кабинет
 function showCabinet() {
