@@ -978,42 +978,47 @@ window.handleRegister = async function() {
 };
 
 // ======================
-// ВХОД
+// ВХОД (исправленный)
 // ======================
-window.handleLogin = async function() {
-    const phone = document.getElementById('loginPhone').value;
-    const password = document.getElementById('loginPassword').value;
-    const errorDiv = document.getElementById('loginError');
+if (path === '/api/login' && request.method === 'POST') {
+  try {
+    const { phone, password } = await request.json();
+    const cleanPhone = phone.replace(/\D/g, '');
     
-    errorDiv.textContent = '';
+    const user = users.find(u => u.phone === cleanPhone);
     
-    if (!phone || !password) {
-        errorDiv.textContent = 'Заполните все поля';
-        return;
+    if (!user) {
+      return new Response(JSON.stringify({ success: false, error: 'Пользователь не найден' }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
     }
     
-    const cleanPhone = phone.replace(/\D/g,'');
-    
-    try {
-        const response = await fetch(`${API_URL}/api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: cleanPhone, password })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            localStorage.setItem('currentUser', JSON.stringify(data.user));
-            showNotification('Успешный вход!');
-            checkAuthAndRedirect();
-        } else {
-            errorDiv.textContent = data.error || 'Неверный телефон или пароль';
-        }
-    } catch (error) {
-        errorDiv.textContent = 'Ошибка подключения к серверу';
+    if (user.password !== password) {
+      return new Response(JSON.stringify({ success: false, error: 'Неверный пароль' }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
     }
-};
+    
+    if (user.verified !== true) {
+      return new Response(JSON.stringify({ success: false, error: 'Номер не подтверждён. Сначала подтвердите код.' }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
+    
+    return new Response(JSON.stringify({ 
+      success: true, 
+      user: { id: user.id, name: user.name, phone: user.phone }
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      status: 500
+    });
+  }
+}
 
 // ======================
 // ВЫХОД
