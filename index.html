@@ -481,7 +481,7 @@
             <span class="material-icons theme-toggle" onclick="toggleTheme()">dark_mode</span>
             <a href="https://t.me/transcargo_support" target="_blank">Telegram</a>
             <a href="order.html">Заказать</a>
-            <a href="login.html">Личный кабинет</a>
+            <a href="login.html" id="cabinetLink">Личный кабинет</a>
         </nav>
     </div>
 </header>
@@ -633,6 +633,22 @@ s0.parentNode.insertBefore(s1,s0);
 <!-- Основные скрипты -->
 <script>
 /* ======================
+   ПРОВЕРКА АВТОРИЗАЦИИ НА ГЛАВНОЙ
+====================== */
+function updateCabinetLink() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const cabinetLink = document.getElementById('cabinetLink');
+    
+    if (currentUser && cabinetLink) {
+        cabinetLink.textContent = `👤 ${currentUser.name}`;
+        cabinetLink.href = "login.html"; // всё равно ведёт в ЛК
+    } else if (cabinetLink) {
+        cabinetLink.textContent = "Личный кабинет";
+        cabinetLink.href = "login.html";
+    }
+}
+
+/* ======================
    ТЕМА (светлая/темная)
 ====================== */
 function toggleTheme() {
@@ -671,21 +687,18 @@ window.addEventListener("scroll", checkFade);
 checkFade();
 
 /* ======================
-   МАСКА ДЛЯ ТЕЛЕФОНА (НОВАЯ)
+   МАСКА ДЛЯ ТЕЛЕФОНА
 ====================== */
 function phoneMask(phone) {
-    // Убираем всё кроме цифр
     let x = phone.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
     
     if (!x[2] && x[1] !== '') {
-        // Если первая цифра не 7 или 8, добавляем 7
         if (x[1] !== '7' && x[1] !== '8') {
             phone.value = '+7 (' + x[1];
         } else {
             phone.value = '+7 (' + x[2];
         }
     } else {
-        // Форматируем номер
         let formatted = '+7 ';
         if (x[1]) formatted += '(' + x[2];
         if (x[3]) formatted += ') ' + x[3];
@@ -696,21 +709,23 @@ function phoneMask(phone) {
     }
 }
 
-// Вешаем маску на поле телефона
 document.addEventListener('DOMContentLoaded', function() {
+    // Маска для телефона
     let phoneInput = document.getElementById('phone');
     if (phoneInput) {
         phoneInput.addEventListener('input', function() {
             phoneMask(this);
         });
         
-        // Устанавливаем курсор в конец
         phoneInput.addEventListener('click', function() {
             if (this.value === '') {
                 this.value = '+7 (';
             }
         });
     }
+    
+    // Обновляем ссылку на кабинет при загрузке
+    updateCabinetLink();
 });
 
 /* ======================
@@ -720,7 +735,7 @@ function sendForm() {
     let name = document.getElementById("name")?.value || '';
     let phone = document.getElementById("phone")?.value || '';
     
-    if (!name || !phone || phone.length < 18) { // +7 (999) 999-99-99 это 18 символов
+    if (!name || !phone || phone.length < 18) {
         alert("Пожалуйста, заполните имя и корректный номер телефона");
         return;
     }
