@@ -309,7 +309,7 @@
         
         <div id="loginForm" class="auth-form active">
             <h2>Вход</h2>
-            <input type="email" id="loginEmail" placeholder="Email (телефон@mail.ru)">
+            <input type="email" id="loginEmail" placeholder="Email">
             <input type="password" id="loginPassword" placeholder="Пароль">
             <div id="loginError" class="auth-error"></div>
             <button class="auth-btn" onclick="window.handleLogin()">Войти</button>
@@ -319,7 +319,7 @@
             <h2>Регистрация</h2>
             <input type="text" id="registerName" placeholder="Имя">
             <input type="text" id="registerPhone" placeholder="Телефон">
-            <input type="email" id="registerEmail" placeholder="Email (телефон@mail.ru)">
+            <input type="email" id="registerEmail" placeholder="Email">
             <input type="password" id="registerPassword" placeholder="Пароль">
             <div id="registerError" class="auth-error"></div>
             <div id="registerSuccess" class="auth-success"></div>
@@ -411,21 +411,27 @@ window.switchCabinetTab = function(tabName, el) {
 // ПРОВЕРКА СЕССИИ
 // ======================
 async function checkAuth() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('full_name, phone')
-            .eq('id', session.user.id)
-            .single();
-        
-        document.getElementById('authContainer').style.display = 'none';
-        document.getElementById('cabinetContainer').style.display = 'block';
-        document.getElementById('userGreeting').textContent = `Здравствуйте, ${profile?.full_name || 'пользователь'}!`;
-        document.getElementById('profileName').value = profile?.full_name || '';
-        document.getElementById('profileEmail').value = session.user.email || '';
-        document.getElementById('profilePhone').value = profile?.phone || '';
-    } else {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name, phone')
+                .eq('id', session.user.id)
+                .single();
+            
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('cabinetContainer').style.display = 'block';
+            document.getElementById('userGreeting').textContent = `Здравствуйте, ${profile?.full_name || 'пользователь'}!`;
+            document.getElementById('profileName').value = profile?.full_name || '';
+            document.getElementById('profileEmail').value = session.user.email || '';
+            document.getElementById('profilePhone').value = profile?.phone || '';
+        } else {
+            document.getElementById('authContainer').style.display = 'block';
+            document.getElementById('cabinetContainer').style.display = 'none';
+        }
+    } catch (e) {
+        console.log('Ошибка проверки сессии:', e);
         document.getElementById('authContainer').style.display = 'block';
         document.getElementById('cabinetContainer').style.display = 'none';
     }
@@ -608,25 +614,37 @@ function showNotification(message) {
 }
 
 // ======================
-// МАСКА ТЕЛЕФОНА
+// МАСКА ТЕЛЕФОНА (исправлена)
+// ======================
+function formatPhone(input) {
+    let x = input.value.replace(/\D/g,'').substring(0,11);
+    if(x.length === 0) { 
+        input.value = ''; 
+        return; 
+    }
+    if(x[0] === '8') x = '7' + x.substring(1);
+    if(x[0] !== '7') x = '7' + x;
+    let f = '+7';
+    if(x.length > 1) f += ' (' + x.substring(1,4);
+    if(x.length >= 4) f += ') ' + x.substring(4,7);
+    if(x.length >= 7) f += '-' + x.substring(7,9);
+    if(x.length >= 9) f += '-' + x.substring(9,11);
+    input.value = f;
+}
+
+// ======================
+// ИНИЦИАЛИЗАЦИЯ
 // ======================
 document.addEventListener('DOMContentLoaded', function() {
+    // Маска для телефона в профиле
     const phoneInput = document.getElementById('profilePhone');
     if(phoneInput) {
-        phoneInput.addEventListener('input', function(e){
-            let x = e.target.value.replace(/\D/g,'').substring(0,11);
-            if(x.length === 0) { e.target.value = ''; return; }
-            if(x[0] === '8') x = '7' + x.substring(1);
-            if(x[0] !== '7') x = '7' + x;
-            let f = '+7';
-            if(x.length > 1) f += ' (' + x.substring(1,4);
-            if(x.length >= 4) f += ') ' + x.substring(4,7);
-            if(x.length >= 7) f += '-' + x.substring(7,9);
-            if(x.length >= 9) f += '-' + x.substring(9,11);
-            e.target.value = f;
+        phoneInput.addEventListener('input', function() {
+            formatPhone(this);
         });
     }
     
+    // Запускаем проверку авторизации
     checkAuth();
 });
 </script>
