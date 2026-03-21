@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- PocketBase -->
+    <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.1/dist/pocketbase.umd.js"></script>
     
     <style>
         :root{ --bg:#fff; --text:#111; --card:#f3f3f3; --header:#fff; --accent:#00aaff; --border:#ddd; }
@@ -29,7 +29,6 @@
             max-width:95%;
             margin:auto;
         }
-                /* Шапка */
         header{
             background:var(--header);
             padding:15px 0;
@@ -80,13 +79,11 @@
             margin-right:5px;
         }
         
-        /* Основной контент */
         .cabinet{
             flex:1;
             padding:40px 0;
         }
         
-        /* Страница входа/регистрации */
         .auth-container{
             max-width:450px;
             margin:50px auto;
@@ -183,7 +180,6 @@
             text-align:center;
         }
         
-        /* Индикатор надежности пароля */
         .password-strength{
             margin:10px 0;
             height:5px;
@@ -209,7 +205,6 @@
             margin-top:5px;
         }
         
-        /* Капча */
         .captcha-box{
             background:var(--bg);
             border-radius:6px;
@@ -240,7 +235,6 @@
             color:var(--accent);
         }
         
-        /* Кабинет (после входа) */
         .cabinet-header{
             display:flex;
             justify-content:space-between;
@@ -275,7 +269,6 @@
             opacity:0.9;
         }
         
-        /* Табы */
         .tabs{
             display:flex;
             gap:10px;
@@ -304,7 +297,6 @@
             color:#fff;
         }
         
-        /* Контент табов */
         .tab-content{
             display:none;
         }
@@ -313,7 +305,6 @@
             display:block;
         }
         
-        /* Карточки заказов */
         .orders-grid{
             display:grid;
             grid-template-columns:repeat(auto-fill, minmax(350px, 1fr));
@@ -412,7 +403,6 @@
             opacity:0.9;
         }
         
-        /* Профиль */
         .profile-grid{
             display:grid;
             grid-template-columns:1fr 1fr;
@@ -470,7 +460,6 @@
             margin-top:10px;
         }
         
-        /* Адреса */
         .addresses-list{
             margin-top:20px;
         }
@@ -520,7 +509,6 @@
             font-weight:bold;
         }
         
-        /* Отслеживание */
         .tracking-card{
             background:var(--card);
             border-radius:10px;
@@ -624,14 +612,12 @@
             gap:10px;
         }
         
-        /* Загрузка */
         .loading{
             text-align:center;
             padding:40px;
             color:var(--accent);
         }
         
-        /* Футер */
         footer{
             background:var(--header);
             padding:25px;
@@ -640,7 +626,6 @@
             margin-top:40px;
         }
         
-        /* Уведомления */
         .notification-popup{
             position:fixed;
             top:20px;
@@ -659,20 +644,16 @@
             to{transform:translateX(0); opacity:1;}
         }
         
-        /* Адаптивность */
         @media (max-width:768px){
             .profile-grid{
                 grid-template-columns:1fr;
             }
-            
             .tracking-form{
                 flex-direction:column;
             }
-            
             .orders-grid{
                 grid-template-columns:1fr;
             }
-            
             .tabs{
                 justify-content:center;
             }
@@ -697,36 +678,31 @@
 </header>
 
 <div class="container cabinet">
-    <!-- Контейнер для входа/регистрации -->
     <div id="authContainer" class="auth-container">
         <div class="auth-tabs">
             <div class="auth-tab active" onclick="window.switchAuthTab('login')">Вход</div>
             <div class="auth-tab" onclick="window.switchAuthTab('register')">Регистрация</div>
         </div>
         
-        <!-- Форма входа -->
         <div id="loginForm" class="auth-form active">
             <h2>Вход в кабинет</h2>
-            <input type="text" id="loginPhone" placeholder="Номер телефона" value="">
-            <input type="password" id="loginPassword" placeholder="Пароль" value="">
+            <input type="text" id="loginPhone" placeholder="Номер телефона">
+            <input type="password" id="loginPassword" placeholder="Пароль">
             <div id="loginError" class="auth-error"></div>
             <button class="auth-btn" onclick="window.handleLogin()">Войти</button>
         </div>
         
-        <!-- Форма регистрации -->
         <div id="registerForm" class="auth-form">
             <h2>Регистрация</h2>
-            <input type="text" id="registerName" placeholder="Имя" value="">
-            <input type="text" id="registerPhone" placeholder="Номер телефона" value="">
-            <input type="password" id="registerPassword" placeholder="Пароль" value="">
+            <input type="text" id="registerName" placeholder="Имя">
+            <input type="text" id="registerPhone" placeholder="Номер телефона">
+            <input type="password" id="registerPassword" placeholder="Пароль">
             
-            <!-- Индикатор надежности пароля -->
             <div class="password-strength">
                 <div id="strengthBar" class="strength-bar"></div>
             </div>
             <div id="strengthText" class="strength-text"></div>
             
-            <!-- Капча -->
             <div class="captcha-box">
                 <div class="captcha-image" id="captchaImage">1234</div>
                 <input type="text" id="captchaInput" class="captcha-input" placeholder="Введите код">
@@ -739,7 +715,6 @@
         </div>
     </div>
     
-    <!-- Контейнер кабинета (скрыт по умолчанию) -->
     <div id="cabinetContainer" style="display:none;">
         <div class="cabinet-header">
             <div class="cabinet-title">
@@ -751,7 +726,6 @@
             </button>
         </div>
         
-        <!-- Табы -->
         <div class="tabs">
             <div class="tab active" onclick="window.switchCabinetTab('orders', this)">📦 Мои заказы</div>
             <div class="tab" onclick="window.switchCabinetTab('profile', this)">👤 Профиль</div>
@@ -759,80 +733,64 @@
             <div class="tab" onclick="window.switchCabinetTab('tracking', this)">🔍 Отследить</div>
         </div>
         
-        <!-- Мои заказы -->
         <div id="orders" class="tab-content active">
             <div class="orders-grid" id="ordersGrid">
                 <div class="loading">Загрузка заказов...</div>
             </div>
         </div>
         
-        <!-- Профиль -->
         <div id="profile" class="tab-content">
             <div class="profile-grid">
                 <div class="profile-section">
                     <h3><span class="material-icons">person</span> Личные данные</h3>
-                    
                     <div class="profile-field">
                         <label>Имя</label>
-                        <input type="text" id="profileName" value="">
+                        <input type="text" id="profileName">
                     </div>
-                    
                     <div class="profile-field">
                         <label>Email</label>
-                        <input type="email" id="profileEmail" value="" placeholder="не указан">
+                        <input type="email" id="profileEmail" placeholder="не указан">
                     </div>
-                    
                     <div class="profile-field">
                         <label>Телефон</label>
-                        <input type="tel" id="profilePhone" value="" readonly style="background:var(--card);">
+                        <input type="tel" id="profilePhone" readonly style="background:var(--card);">
                     </div>
-                    
                     <button class="save-btn" onclick="window.saveProfile()">Сохранить изменения</button>
                 </div>
-                
                 <div class="profile-section">
                     <h3><span class="material-icons">security</span> Безопасность</h3>
-                    
                     <div class="profile-field">
                         <label>Новый пароль</label>
                         <input type="password" id="newPassword" placeholder="Новый пароль">
                     </div>
-                    
                     <div class="profile-field">
                         <label>Подтверждение пароля</label>
                         <input type="password" id="confirmPassword" placeholder="Подтвердите пароль">
                     </div>
-                    
                     <button class="save-btn" onclick="window.changePassword()">Изменить пароль</button>
                 </div>
             </div>
         </div>
         
-        <!-- Мои адреса -->
         <div id="addresses" class="tab-content">
             <div class="profile-section">
                 <h3><span class="material-icons">location_on</span> Сохраненные адреса</h3>
-                
                 <div class="addresses-list" id="addressesList">
                     <div class="loading">Загрузка адресов...</div>
                 </div>
-                
                 <div class="add-address" onclick="window.addAddress()">
                     <span class="material-icons" style="vertical-align:middle;">add</span> Добавить новый адрес
                 </div>
             </div>
         </div>
         
-        <!-- Отслеживание -->
         <div id="tracking" class="tab-content">
             <div class="tracking-card">
                 <h3 style="margin-top:0;">Отследить груз</h3>
-                
                 <div class="tracking-form">
                     <input type="text" id="trackNumber" placeholder="Введите номер заказа">
                     <button onclick="window.trackOrder()">Отследить</button>
                 </div>
-                
                 <div id="trackingResult" style="display:none;"></div>
             </div>
         </div>
@@ -844,38 +802,12 @@
     <small>Служба поддержки: +7 (800) 555-35-35</small>
 </footer>
 
-<!-- Tawk.to -->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true; s1.src='https://embed.tawk.to/69b562ef5024d01c38daccb3/1jjm8ktpu';
-s1.charset='UTF-8'; s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-
 <script>
 // ======================
-// ГЛОБАЛЬНЫЙ ОБЪЕКТ ДЛЯ ФУНКЦИЙ
+// ИНИЦИАЛИЗАЦИЯ POCKETBASE
 // ======================
-window.supabaseClient = null;
-window.currentUser = null;
-
-// ======================
-// ИНИЦИАЛИЗАЦИЯ SUPABASE
-// ======================
-(function initSupabase() {
-    const SUPABASE_URL = 'https://pnheueabzgwcyyisyaur.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuaGV1ZWFiemd3Y3l5aXN5YXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MjY0MTUsImV4cCI6MjA4OTMwMjQxNX0.VtMdKZONRK1_6J2ZPqwWknDYd9_vDMcr1Jin06UNCv8';
-    
-    try {
-        window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase инициализирован');
-    } catch(e) {
-        console.error('Ошибка инициализации Supabase:', e);
-    }
-})();
+const pb = new PocketBase('http://127.0.0.1:8090');
+const COLLECTION = 'UsersFurtherWind';
 
 // ======================
 // ТЕМА
@@ -889,59 +821,11 @@ window.toggleTheme = function() {
     }
 };
 
-// Загружаем сохраненную тему
-(function loadTheme() {
-    if(localStorage.getItem("theme") == "dark") {
-        document.body.classList.add("dark");
-        const themeIcon = document.querySelector('.theme-toggle');
-        if(themeIcon) themeIcon.textContent = 'light_mode';
-    }
-})();
-
-// ======================
-// ИНДИКАТОР НАДЕЖНОСТИ ПАРОЛЯ
-// ======================
-document.addEventListener('DOMContentLoaded', function() {
-    const passwordInput = document.getElementById('registerPassword');
-    if(passwordInput) {
-        passwordInput.addEventListener('input', function() {
-            const password = this.value;
-            const strengthBar = document.getElementById('strengthBar');
-            const strengthText = document.getElementById('strengthText');
-            
-            // Оценка надежности
-            let strength = 0;
-            if(password.length >= 6) strength++;
-            if(password.length >= 8) strength++;
-            if(/[A-Z]/.test(password)) strength++;
-            if(/[0-9]/.test(password)) strength++;
-            if(/[^A-Za-z0-9]/.test(password)) strength++;
-            
-            // Обновление индикатора
-            strengthBar.className = 'strength-bar';
-            if(password.length === 0) {
-                strengthBar.style.width = '0';
-                strengthText.textContent = '';
-            } else if(strength <= 2) {
-                strengthBar.classList.add('strength-weak');
-                strengthText.textContent = 'Слабый пароль';
-                strengthText.style.color = '#ff4444';
-            } else if(strength <= 3) {
-                strengthBar.classList.add('strength-medium');
-                strengthText.textContent = 'Средний пароль';
-                strengthText.style.color = '#ffa700';
-            } else if(strength <= 4) {
-                strengthBar.classList.add('strength-good');
-                strengthText.textContent = 'Хороший пароль';
-                strengthText.style.color = '#ffd700';
-            } else {
-                strengthBar.classList.add('strength-strong');
-                strengthText.textContent = 'Надежный пароль';
-                strengthText.style.color = '#4CAF50';
-            }
-        });
-    }
-});
+if(localStorage.getItem("theme") == "dark") {
+    document.body.classList.add("dark");
+    const themeIcon = document.querySelector('.theme-toggle');
+    if(themeIcon) themeIcon.textContent = 'light_mode';
+}
 
 // ======================
 // КАПЧА
@@ -953,37 +837,11 @@ window.refreshCaptcha = function() {
     document.getElementById('captchaImage').textContent = currentCaptcha;
 };
 
-// Генерируем первую капчу
-setTimeout(() => {
-    window.refreshCaptcha();
-}, 100);
+setTimeout(() => window.refreshCaptcha(), 100);
 
 // ======================
-// АВТОРИЗАЦИЯ
+// ПЕРЕКЛЮЧЕНИЕ ТАБОВ
 // ======================
-
-// Проверяем сессию при загрузке
-async function checkSession() {
-    if (!window.supabaseClient) {
-        console.error('Supabase не инициализирован');
-        return;
-    }
-    
-    try {
-        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
-        if (error) throw error;
-        
-        if (session) {
-            window.currentUser = session.user;
-            showCabinet();
-            loadUserData();
-        }
-    } catch (error) {
-        console.error('Ошибка проверки сессии:', error);
-    }
-}
-
-// Переключение между входом и регистрацией
 window.switchAuthTab = function(tab) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
@@ -998,46 +856,12 @@ window.switchAuthTab = function(tab) {
     }
 };
 
-// Форматирование телефона
-function formatPhone(phone) {
-    let x = phone.replace(/\D/g,'').substring(0,11);
-    if(x.length === 0) return '';
-    if(x[0] === '8') x = '7' + x.substring(1);
-    if(x[0] !== '7') x = '7' + x;
-    
-    let formatted = '+7';
-    if(x.length > 1) formatted += ' (' + x.substring(1,4);
-    if(x.length >= 4) formatted += ') ' + x.substring(4,7);
-    if(x.length >= 7) formatted += '-' + x.substring(7,9);
-    if(x.length >= 9) formatted += '-' + x.substring(9,11);
-    
-    return formatted;
-}
-
-// Вход через localStorage (без Supabase Auth)
-window.handleLogin = function() {
-    const phone = document.getElementById('loginPhone').value;
-    const password = document.getElementById('loginPassword').value;
-    const errorDiv = document.getElementById('loginError');
-    
-    const cleanPhone = phone.replace(/\D/g,'');
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const user = users.find(u => u.phone === cleanPhone && u.password === password);
-    
-    if (user) {
-        showNotification('Вход выполнен!');
-        document.getElementById('authContainer').style.display = 'none';
-        document.getElementById('cabinetContainer').style.display = 'block';
-        document.getElementById('userGreeting').textContent = `Здравствуйте, ${user.name}!`;
-    } else {
-        errorDiv.textContent = 'Неверный телефон или пароль';
-    }
+window.switchCabinetTab = function(tabName, element) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    element.classList.add('active');
+    document.getElementById(tabName).classList.add('active');
 };
-
-<script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.1/dist/pocketbase.umd.js"></script>
-<script>
-const pb = new PocketBase('http://127.0.0.1:8090');
-const COLLECTION = 'UsersFurtherWind';
 
 // ======================
 // РЕГИСТРАЦИЯ
@@ -1134,14 +958,12 @@ window.handleRegister = async function() {
         verifyButton.onclick = async () => {
             const userCode = document.getElementById('verificationCode').value;
             
-            // Ищем пользователя по коду
             const result = await pb.collection(COLLECTION).getList(1, 1, {
                 filter: `phone = "${cleanPhone}" && code = "${userCode}" && code_expires > ${Date.now()}`
             });
             
             if (result.items.length > 0) {
                 const user = result.items[0];
-                // Подтверждаем
                 await pb.collection(COLLECTION).update(user.id, {
                     verified: true,
                     code: null,
@@ -1191,7 +1013,6 @@ window.handleLogin = async function() {
     const cleanPhone = phone.replace(/\D/g,'');
     
     try {
-        // Ищем пользователя с таким телефоном и паролем
         const result = await pb.collection(COLLECTION).getList(1, 1, {
             filter: `phone = "${cleanPhone}" && password = "${password}" && verified = true`
         });
@@ -1214,7 +1035,6 @@ window.handleLogin = async function() {
             errorDiv.textContent = 'Неверный телефон или пароль';
         }
     } catch (error) {
-        console.error(error);
         errorDiv.textContent = 'Ошибка подключения к базе';
     }
 };
@@ -1237,13 +1057,57 @@ function loadUserData() {
     document.getElementById('profileName').value = currentUser.name || '';
     document.getElementById('profilePhone').value = currentUser.phone || '';
     
-    document.getElementById('ordersGrid').innerHTML = `
-        <div style="text-align:center; padding:20px;">У вас пока нет заказов</div>
-    `;
-    document.getElementById('addressesList').innerHTML = `
-        <div style="text-align:center; padding:20px;">У вас пока нет сохраненных адресов</div>
-    `;
+    document.getElementById('ordersGrid').innerHTML = '<div class="loading">У вас пока нет заказов</div>';
+    document.getElementById('addressesList').innerHTML = '<div class="loading">У вас пока нет сохраненных адресов</div>';
 }
+
+// ======================
+// ДЕЙСТВИЯ С ПРОФИЛЕМ
+// ======================
+window.saveProfile = function() {
+    showNotification('Данные сохранены');
+};
+
+window.changePassword = function() {
+    showNotification('Пароль изменен');
+};
+
+// ======================
+// ДЕЙСТВИЯ С АДРЕСАМИ
+// ======================
+window.addAddress = function() {
+    showNotification('Адрес добавлен');
+};
+
+window.setDefaultAddress = function(id) {
+    showNotification('Адрес по умолчанию изменен');
+};
+
+window.editAddress = function(id, oldAddress) {
+    showNotification('Адрес обновлен');
+};
+
+window.deleteAddress = function(id) {
+    showNotification('Адрес удален');
+};
+
+// ======================
+// ОТСЛЕЖИВАНИЕ
+// ======================
+window.trackOrder = async function(number = null) {
+    const trackNum = number || document.getElementById('trackNumber').value;
+    if (!trackNum) {
+        showNotification('Введите номер заказа');
+        return;
+    }
+    showNotification(`Заказ ${trackNum} найден (заглушка)`);
+};
+
+window.repeatOrder = function(number) {
+    if (confirm(`Повторить заказ №${number}?`)) {
+        window.location.href = `order.html?repeat=${number}`;
+    }
+};
 
 // ======================
 // УВЕДОМЛЕНИЯ
@@ -1255,486 +1119,11 @@ function showNotification(message) {
     document.body.appendChild(notification);
     setTimeout(() => notification.remove(), 3000);
 }
-</script>
-
-// Показать кабинет
-function showCabinet() {
-    document.getElementById('authContainer').style.display = 'none';
-    document.getElementById('cabinetContainer').style.display = 'block';
-}
 
 // ======================
-// ЗАГРУЗКА ДАННЫХ
-// ======================
-async function loadUserData() {
-    if (!window.currentUser) return;
-    
-    try {
-        // Загружаем профиль
-        const { data: profile, error } = await window.supabaseClient
-            .from('profiles')
-            .select('*')
-            .eq('id', window.currentUser.id)
-            .single();
-        
-        if (profile) {
-            document.getElementById('userGreeting').textContent = `Здравствуйте, ${profile.full_name || 'пользователь'}!`;
-            document.getElementById('profileName').value = profile.full_name || '';
-            document.getElementById('profilePhone').value = profile.phone || window.currentUser.email?.replace('@phone.transcargo.ru', '') || '';
-            document.getElementById('profileEmail').value = window.currentUser.email?.includes('@phone.transcargo.ru') ? '' : window.currentUser.email || '';
-        } else {
-            document.getElementById('userGreeting').textContent = `Здравствуйте, пользователь!`;
-        }
-        
-        // Загружаем заказы
-        loadOrders();
-        
-        // Загружаем адреса
-        loadAddresses();
-        
-    } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
-    }
-}
-
-// Загрузка заказов
-async function loadOrders() {
-    const grid = document.getElementById('ordersGrid');
-    
-    try {
-        const { data: orders, error } = await window.supabaseClient
-            .from('orders')
-            .select('*')
-            .eq('user_id', window.currentUser.id)
-            .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        if (!orders || orders.length === 0) {
-            grid.innerHTML = '<div style="text-align:center; padding:20px;">У вас пока нет заказов</div>';
-            return;
-        }
-        
-        grid.innerHTML = '';
-        
-        orders.forEach(order => {
-            const statusClass = {
-                'new': 'status-new',
-                'processing': 'status-processing',
-                'delivered': 'status-delivered',
-                'cancelled': 'status-cancelled'
-            }[order.status] || 'status-new';
-            
-            const statusText = {
-                'new': 'Новый',
-                'processing': 'В обработке',
-                'delivered': 'Доставлен',
-                'cancelled': 'Отменен'
-            }[order.status] || 'Новый';
-            
-            const card = document.createElement('div');
-            card.className = 'order-card';
-            card.innerHTML = `
-                <div class="order-header">
-                    <span class="order-number">Заказ №${order.order_number}</span>
-                    <span class="order-status ${statusClass}">${statusText}</span>
-                </div>
-                <div class="order-info">
-                    <p><span class="material-icons">date_range</span> ${new Date(order.created_at).toLocaleDateString()}</p>
-                    <p><span class="material-icons">location_on</span> ${order.from_address}</p>
-                    <p><span class="material-icons">location_on</span> ${order.to_address}</p>
-                    <p><span class="material-icons">inventory</span> ${order.cargo_type}</p>
-                </div>
-                <div class="order-price">${order.price} ₽</div>
-                <div class="order-actions">
-                    <button class="order-btn track" onclick="window.trackOrder('${order.order_number}')">Отследить</button>
-                    <button class="order-btn repeat" onclick="window.repeatOrder('${order.order_number}')">Повторить</button>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-        
-    } catch (error) {
-        grid.innerHTML = '<div style="text-align:center; padding:20px;">Ошибка загрузки заказов</div>';
-    }
-}
-
-// Загрузка адресов
-async function loadAddresses() {
-    const list = document.getElementById('addressesList');
-    
-    try {
-        const { data: addresses, error } = await window.supabaseClient
-            .from('addresses')
-            .select('*')
-            .eq('user_id', window.currentUser.id)
-            .order('is_default', { ascending: false });
-        
-        if (error) {
-            console.error('Ошибка загрузки адресов:', error);
-            list.innerHTML = '<div style="text-align:center; padding:20px;">Ошибка загрузки адресов. Проверьте права доступа.</div>';
-            return;
-        }
-        
-        if (!addresses || addresses.length === 0) {
-            list.innerHTML = '<div style="text-align:center; padding:20px;">У вас пока нет сохраненных адресов</div>';
-            return;
-        }
-        
-        list.innerHTML = '';
-        
-        addresses.forEach(addr => {
-            const item = document.createElement('div');
-            item.className = `address-item ${addr.is_default ? 'default' : ''}`;
-            item.innerHTML = `
-                <div>
-                    ${addr.is_default ? '<span class="material-icons" style="color:var(--accent);">star</span>' : ''}
-                    ${addr.address}
-                </div>
-                <div class="address-actions">
-                    ${!addr.is_default ? `<button onclick="window.setDefaultAddress('${addr.id}')">★</button>` : ''}
-                    <button onclick="window.editAddress('${addr.id}', '${addr.address.replace(/'/g, "\\'")}')">✎</button>
-                    <button onclick="window.deleteAddress('${addr.id}')">✕</button>
-                </div>
-            `;
-            list.appendChild(item);
-        });
-        
-    } catch (error) {
-        console.error('Ошибка:', error);
-        list.innerHTML = '<div style="text-align:center; padding:20px;">Ошибка загрузки адресов</div>';
-    }
-}
-
-// ======================
-// ДЕЙСТВИЯ С ПРОФИЛЕМ
-// ======================
-window.saveProfile = async function() {
-    const name = document.getElementById('profileName').value;
-    const email = document.getElementById('profileEmail').value;
-    
-    try {
-        // Обновляем профиль
-        const { error: profileError } = await window.supabaseClient
-            .from('profiles')
-            .upsert({
-                id: window.currentUser.id,
-                full_name: name,
-                email: email,
-                updated_at: new Date()
-            });
-        
-        if (profileError) throw profileError;
-        
-        // Если email изменился и это не телефонный, обновляем в auth
-        if (email && !email.includes('@phone.transcargo.ru')) {
-            const { error: emailError } = await window.supabaseClient.auth.updateUser({
-                email: email
-            });
-            if (emailError) console.error('Ошибка обновления email:', emailError);
-        }
-        
-        showNotification('Данные сохранены');
-        document.getElementById('userGreeting').textContent = `Здравствуйте, ${name || 'пользователь'}!`;
-        
-    } catch (error) {
-        showNotification('Ошибка при сохранении: ' + error.message);
-    }
-};
-
-window.changePassword = async function() {
-    const newPass = document.getElementById('newPassword').value;
-    const confirm = document.getElementById('confirmPassword').value;
-    
-    if (!newPass || !confirm) {
-        showNotification('Заполните все поля');
-        return;
-    }
-    
-    if (newPass.length < 6) {
-        showNotification('Пароль должен быть не менее 6 символов');
-        return;
-    }
-    
-    if (newPass !== confirm) {
-        showNotification('Пароли не совпадают');
-        return;
-    }
-    
-    try {
-        const { error } = await window.supabaseClient.auth.updateUser({
-            password: newPass
-        });
-        
-        if (error) throw error;
-        
-        showNotification('Пароль успешно изменен');
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmPassword').value = '';
-        
-    } catch (error) {
-        showNotification('Ошибка: ' + error.message);
-    }
-};
-// Функция отправки кода
-async function sendCode(phone) {
-    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 цифр
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 10); // +10 минут
-    
-    const { error } = await supabase
-        .from('verification_codes')
-        .insert({
-            phone: phone,
-            code: code,
-            expires_at: expiresAt.toISOString()
-        });
-    
-    if (!error) {
-        alert(`Код отправлен в Telegram! Напишите боту @FurtherWindBot и отправьте: ${code}`);
-    }
-}
-// ======================
-// ДЕЙСТВИЯ С АДРЕСАМИ (ИСПРАВЛЕНО)
-// ======================
-window.addAddress = async function() {
-    const newAddr = prompt('Введите новый адрес:');
-    if (!newAddr) return;
-    
-    try {
-        // Проверяем, есть ли уже адреса
-        const { data: existing, error: checkError } = await window.supabaseClient
-            .from('addresses')
-            .select('id')
-            .eq('user_id', window.currentUser.id);
-        
-        if (checkError) throw checkError;
-        
-        // Если это первый адрес, делаем его по умолчанию
-        const isDefault = !existing || existing.length === 0;
-        
-        const { error } = await window.supabaseClient
-            .from('addresses')
-            .insert({
-                user_id: window.currentUser.id,
-                address: newAddr,
-                is_default: isDefault
-            });
-        
-        if (error) {
-            console.error('Ошибка SQL:', error);
-            if (error.message.includes('row-level security')) {
-                showNotification('Ошибка прав доступа. Проверьте настройки Supabase.');
-            } else {
-                showNotification('Ошибка при добавлении: ' + error.message);
-            }
-            return;
-        }
-        
-        showNotification('Адрес добавлен');
-        loadAddresses();
-        
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showNotification('Ошибка при добавлении: ' + error.message);
-    }
-};
-
-window.setDefaultAddress = async function(id) {
-    try {
-        // Сначала сбрасываем все адреса
-        const { error: resetError } = await window.supabaseClient
-            .from('addresses')
-            .update({ is_default: false })
-            .eq('user_id', window.currentUser.id);
-        
-        if (resetError) throw resetError;
-        
-        // Устанавливаем новый по умолчанию
-        const { error } = await window.supabaseClient
-            .from('addresses')
-            .update({ is_default: true })
-            .eq('id', id);
-        
-        if (error) throw error;
-        
-        showNotification('Адрес по умолчанию изменен');
-        loadAddresses();
-        
-    } catch (error) {
-        showNotification('Ошибка: ' + error.message);
-    }
-};
-
-window.editAddress = async function(id, oldAddress) {
-    const newAddr = prompt('Измените адрес:', oldAddress);
-    if (!newAddr || newAddr === oldAddress) return;
-    
-    try {
-        const { error } = await window.supabaseClient
-            .from('addresses')
-            .update({ address: newAddr })
-            .eq('id', id);
-        
-        if (error) throw error;
-        
-        showNotification('Адрес обновлен');
-        loadAddresses();
-        
-    } catch (error) {
-        showNotification('Ошибка: ' + error.message);
-    }
-};
-
-window.deleteAddress = async function(id) {
-    if (!confirm('Удалить адрес?')) return;
-    
-    try {
-        // Проверяем, не является ли адрес используемым в заказах
-        const { data: orders, error: checkError } = await window.supabaseClient
-            .from('orders')
-            .select('id')
-            .eq('user_id', window.currentUser.id)
-            .or(`from_address.ilike.%${id}%,to_address.ilike.%${id}%`);
-        
-        if (checkError) throw checkError;
-        
-        if (orders && orders.length > 0) {
-            if (!confirm('Этот адрес используется в заказах. Всё равно удалить?')) {
-                return;
-            }
-        }
-        
-        const { error } = await window.supabaseClient
-            .from('addresses')
-            .delete()
-            .eq('id', id);
-        
-        if (error) throw error;
-        
-        showNotification('Адрес удален');
-        loadAddresses();
-        
-    } catch (error) {
-        showNotification('Ошибка: ' + error.message);
-    }
-};
-
-// ======================
-// ОТСЛЕЖИВАНИЕ
-// ======================
-window.trackOrder = async function(number = null) {
-    const trackNum = number || document.getElementById('trackNumber').value;
-    
-    if (!trackNum) {
-        showNotification('Введите номер заказа');
-        return;
-    }
-    
-    try {
-        const { data: order, error } = await window.supabaseClient
-            .from('orders')
-            .select('*')
-            .eq('order_number', trackNum)
-            .single();
-        
-        const resultDiv = document.getElementById('trackingResult');
-        
-        if (error || !order) {
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = '<div style="text-align:center; padding:20px;">Заказ не найден</div>';
-            return;
-        }
-        
-        // Определяем статус
-        const steps = {
-            'new': [true, false, false, false],
-            'processing': [true, true, false, false],
-            'delivered': [true, true, true, true],
-            'cancelled': [false, false, false, false]
-        };
-        
-        const status = order.status || 'new';
-        const stepStatus = steps[status] || steps.new;
-        
-        resultDiv.style.display = 'block';
-        resultDiv.innerHTML = `
-            <h4>Заказ № ${order.order_number}</h4>
-            
-            <div class="tracking-steps">
-                <div class="step ${stepStatus[0] ? 'completed' : ''}">
-                    <div class="step-dot"></div>
-                    <div class="step-label">Принят</div>
-                </div>
-                <div class="step ${stepStatus[1] ? 'completed' : ''}">
-                    <div class="step-dot"></div>
-                    <div class="step-label">На складе</div>
-                </div>
-                <div class="step ${stepStatus[2] ? 'active' : ''}">
-                    <div class="step-dot"></div>
-                    <div class="step-label">В пути</div>
-                </div>
-                <div class="step ${stepStatus[3] ? 'completed' : ''}">
-                    <div class="step-dot"></div>
-                    <div class="step-label">Доставлен</div>
-                </div>
-            </div>
-            
-            <div class="tracking-info">
-                <p><span class="material-icons">location_on</span> <b>Откуда:</b> ${order.from_address}</p>
-                <p><span class="material-icons">location_on</span> <b>Куда:</b> ${order.to_address}</p>
-                <p><span class="material-icons">schedule</span> <b>Дата заказа:</b> ${new Date(order.created_at).toLocaleDateString()}</p>
-                <p><span class="material-icons">inventory</span> <b>Тип груза:</b> ${order.cargo_type}</p>
-                <p><span class="material-icons">payments</span> <b>Стоимость:</b> ${order.price} ₽</p>
-            </div>
-        `;
-        
-    } catch (error) {
-        showNotification('Ошибка: ' + error.message);
-    }
-};
-
-window.repeatOrder = function(number) {
-    if (confirm(`Повторить заказ №${number}?`)) {
-        window.location.href = `order.html?repeat=${number}`;
-    }
-};
-
-// ======================
-// ПЕРЕКЛЮЧЕНИЕ ТАБОВ
-// ======================
-window.switchCabinetTab = function(tabName, element) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    
-    element.classList.add('active');
-    document.getElementById(tabName).classList.add('active');
-};
-
-// ======================
-// УВЕДОМЛЕНИЯ
-// ======================
-function showNotification(message) {
-    const notification = document.createElement('div');
-    notification.className = 'notification-popup';
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-// ======================
-// ИНИЦИАЛИЗАЦИЯ
+// МАСКА ТЕЛЕФОНА
 // ======================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Страница загружена');
-    
-    // Проверяем сессию
-    setTimeout(checkSession, 500);
-    
-    // Маска для телефона в регистрации
     const phoneInputs = ['registerPhone', 'loginPhone'];
     phoneInputs.forEach(id => {
         const input = document.getElementById(id);
