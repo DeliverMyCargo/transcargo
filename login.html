@@ -6,9 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
-    <!-- PocketBase -->
-    <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.1/dist/pocketbase.umd.js"></script>
-    
     <style>
         :root{ --bg:#fff; --text:#111; --card:#f3f3f3; --header:#fff; --accent:#00aaff; --border:#ddd; }
         .dark{ --bg:#1f1f1f; --text:#fff; --card:#2a2a2a; --header:#111; --accent:#00aaff; --border:#444; }
@@ -29,6 +26,8 @@
             max-width:95%;
             margin:auto;
         }
+        
+        /* Шапка */
         header{
             background:var(--header);
             padding:15px 0;
@@ -79,11 +78,13 @@
             margin-right:5px;
         }
         
+        /* Основной контент */
         .cabinet{
             flex:1;
             padding:40px 0;
         }
         
+        /* Страница входа/регистрации */
         .auth-container{
             max-width:450px;
             margin:50px auto;
@@ -180,6 +181,7 @@
             text-align:center;
         }
         
+        /* Индикатор надежности пароля */
         .password-strength{
             margin:10px 0;
             height:5px;
@@ -205,6 +207,7 @@
             margin-top:5px;
         }
         
+        /* Капча */
         .captcha-box{
             background:var(--bg);
             border-radius:6px;
@@ -235,6 +238,7 @@
             color:var(--accent);
         }
         
+        /* Кабинет (после входа) */
         .cabinet-header{
             display:flex;
             justify-content:space-between;
@@ -269,6 +273,7 @@
             opacity:0.9;
         }
         
+        /* Табы */
         .tabs{
             display:flex;
             gap:10px;
@@ -297,6 +302,7 @@
             color:#fff;
         }
         
+        /* Контент табов */
         .tab-content{
             display:none;
         }
@@ -305,6 +311,7 @@
             display:block;
         }
         
+        /* Карточки заказов */
         .orders-grid{
             display:grid;
             grid-template-columns:repeat(auto-fill, minmax(350px, 1fr));
@@ -403,6 +410,7 @@
             opacity:0.9;
         }
         
+        /* Профиль */
         .profile-grid{
             display:grid;
             grid-template-columns:1fr 1fr;
@@ -460,6 +468,7 @@
             margin-top:10px;
         }
         
+        /* Адреса */
         .addresses-list{
             margin-top:20px;
         }
@@ -509,6 +518,7 @@
             font-weight:bold;
         }
         
+        /* Отслеживание */
         .tracking-card{
             background:var(--card);
             border-radius:10px;
@@ -612,12 +622,14 @@
             gap:10px;
         }
         
+        /* Загрузка */
         .loading{
             text-align:center;
             padding:40px;
             color:var(--accent);
         }
         
+        /* Футер */
         footer{
             background:var(--header);
             padding:25px;
@@ -626,6 +638,7 @@
             margin-top:40px;
         }
         
+        /* Уведомления */
         .notification-popup{
             position:fixed;
             top:20px;
@@ -644,16 +657,20 @@
             to{transform:translateX(0); opacity:1;}
         }
         
+        /* Адаптивность */
         @media (max-width:768px){
             .profile-grid{
                 grid-template-columns:1fr;
             }
+            
             .tracking-form{
                 flex-direction:column;
             }
+            
             .orders-grid{
                 grid-template-columns:1fr;
             }
+            
             .tabs{
                 justify-content:center;
             }
@@ -734,39 +751,22 @@
         </div>
         
         <div id="orders" class="tab-content active">
-            <div class="orders-grid" id="ordersGrid">
-                <div class="loading">Загрузка заказов...</div>
-            </div>
+            <div class="orders-grid" id="ordersGrid"><div class="loading">У вас пока нет заказов</div></div>
         </div>
         
         <div id="profile" class="tab-content">
             <div class="profile-grid">
                 <div class="profile-section">
                     <h3><span class="material-icons">person</span> Личные данные</h3>
-                    <div class="profile-field">
-                        <label>Имя</label>
-                        <input type="text" id="profileName">
-                    </div>
-                    <div class="profile-field">
-                        <label>Email</label>
-                        <input type="email" id="profileEmail" placeholder="не указан">
-                    </div>
-                    <div class="profile-field">
-                        <label>Телефон</label>
-                        <input type="tel" id="profilePhone" readonly style="background:var(--card);">
-                    </div>
+                    <div class="profile-field"><label>Имя</label><input type="text" id="profileName"></div>
+                    <div class="profile-field"><label>Email</label><input type="email" id="profileEmail" placeholder="не указан"></div>
+                    <div class="profile-field"><label>Телефон</label><input type="tel" id="profilePhone" readonly style="background:var(--card);"></div>
                     <button class="save-btn" onclick="window.saveProfile()">Сохранить изменения</button>
                 </div>
                 <div class="profile-section">
                     <h3><span class="material-icons">security</span> Безопасность</h3>
-                    <div class="profile-field">
-                        <label>Новый пароль</label>
-                        <input type="password" id="newPassword" placeholder="Новый пароль">
-                    </div>
-                    <div class="profile-field">
-                        <label>Подтверждение пароля</label>
-                        <input type="password" id="confirmPassword" placeholder="Подтвердите пароль">
-                    </div>
+                    <div class="profile-field"><label>Новый пароль</label><input type="password" id="newPassword" placeholder="Новый пароль"></div>
+                    <div class="profile-field"><label>Подтверждение пароля</label><input type="password" id="confirmPassword" placeholder="Подтвердите пароль"></div>
                     <button class="save-btn" onclick="window.changePassword()">Изменить пароль</button>
                 </div>
             </div>
@@ -775,18 +775,14 @@
         <div id="addresses" class="tab-content">
             <div class="profile-section">
                 <h3><span class="material-icons">location_on</span> Сохраненные адреса</h3>
-                <div class="addresses-list" id="addressesList">
-                    <div class="loading">Загрузка адресов...</div>
-                </div>
-                <div class="add-address" onclick="window.addAddress()">
-                    <span class="material-icons" style="vertical-align:middle;">add</span> Добавить новый адрес
-                </div>
+                <div class="addresses-list" id="addressesList"><div class="loading">У вас пока нет адресов</div></div>
+                <div class="add-address" onclick="window.addAddress()">+ Добавить новый адрес</div>
             </div>
         </div>
         
         <div id="tracking" class="tab-content">
             <div class="tracking-card">
-                <h3 style="margin-top:0;">Отследить груз</h3>
+                <h3>Отследить груз</h3>
                 <div class="tracking-form">
                     <input type="text" id="trackNumber" placeholder="Введите номер заказа">
                     <button onclick="window.trackOrder()">Отследить</button>
@@ -797,55 +793,40 @@
     </div>
 </div>
 
-<footer>
-    © 2026 TransCargo. Все права защищены.<br>
-    <small>Служба поддержки: +7 (800) 555-35-35</small>
-</footer>
+<footer>© 2026 TransCargo. Все права защищены.<br><small>Служба поддержки: +7 (800) 555-35-35</small></footer>
 
 <script>
-// ======================
-// ИНИЦИАЛИЗАЦИЯ POCKETBASE
-// ======================
-const pb = new PocketBase('http://127.0.0.1:8090');
-const COLLECTION = 'UsersFurtherWind';
-
 // ======================
 // ТЕМА
 // ======================
 window.toggleTheme = function() {
     document.body.classList.toggle("dark");
     localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
-    const themeIcon = document.querySelector('.theme-toggle');
-    if(themeIcon) {
-        themeIcon.textContent = document.body.classList.contains("dark") ? 'light_mode' : 'dark_mode';
-    }
+    const icon = document.querySelector('.theme-toggle');
+    if(icon) icon.textContent = document.body.classList.contains("dark") ? 'light_mode' : 'dark_mode';
 };
 
 if(localStorage.getItem("theme") == "dark") {
     document.body.classList.add("dark");
-    const themeIcon = document.querySelector('.theme-toggle');
-    if(themeIcon) themeIcon.textContent = 'light_mode';
+    document.querySelector('.theme-toggle').textContent = 'light_mode';
 }
 
 // ======================
 // КАПЧА
 // ======================
 let currentCaptcha = '';
-
 window.refreshCaptcha = function() {
     currentCaptcha = Math.floor(1000 + Math.random() * 9000).toString();
     document.getElementById('captchaImage').textContent = currentCaptcha;
 };
-
 setTimeout(() => window.refreshCaptcha(), 100);
 
 // ======================
-// ПЕРЕКЛЮЧЕНИЕ ТАБОВ
+// ПЕРЕКЛЮЧЕНИЕ
 // ======================
 window.switchAuthTab = function(tab) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-    
     if(tab === 'login') {
         document.querySelectorAll('.auth-tab')[0].classList.add('active');
         document.getElementById('loginForm').classList.add('active');
@@ -856,10 +837,10 @@ window.switchAuthTab = function(tab) {
     }
 };
 
-window.switchCabinetTab = function(tabName, element) {
+window.switchCabinetTab = function(tabName, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    element.classList.add('active');
+    el.classList.add('active');
     document.getElementById(tabName).classList.add('active');
 };
 
@@ -867,6 +848,23 @@ window.switchCabinetTab = function(tabName, element) {
 // API НАСТРОЙКИ
 // ======================
 const API_URL = 'https://hidden-credit-3437.andrey-2019-myashin.workers.dev';
+
+// ======================
+// ПРОВЕРКА АВТОРИЗАЦИИ ПРИ ЗАГРУЗКЕ
+// ======================
+function checkAuthAndRedirect() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    
+    if (currentUser) {
+        document.getElementById('authContainer').style.display = 'none';
+        document.getElementById('cabinetContainer').style.display = 'block';
+        document.getElementById('userGreeting').textContent = `Здравствуйте, ${currentUser.name}!`;
+        loadUserData();
+    } else {
+        document.getElementById('authContainer').style.display = 'block';
+        document.getElementById('cabinetContainer').style.display = 'none';
+    }
+}
 
 // ======================
 // РЕГИСТРАЦИЯ
@@ -912,17 +910,12 @@ window.handleRegister = async function() {
         const response = await fetch(`${API_URL}/api/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                name: name, 
-                phone: cleanPhone, 
-                password: password 
-            })
+            body: JSON.stringify({ name, phone: cleanPhone, password })
         });
         
         const data = await response.json();
         
         if (data.success) {
-            // ПОКАЗЫВАЕМ КОД
             successDiv.innerHTML = `
                 <div style="text-align: center; padding: 15px;">
                     <div style="font-size: 14px; color: #666;">✅ Регистрация успешна!</div>
@@ -935,7 +928,6 @@ window.handleRegister = async function() {
                 </div>
             `;
             
-            // Поле для ввода кода
             const codeInput = document.createElement('input');
             codeInput.id = 'verificationCode';
             codeInput.type = 'text';
@@ -974,14 +966,11 @@ window.handleRegister = async function() {
             document.getElementById('registerForm').appendChild(codeInput);
             document.getElementById('registerForm').appendChild(verifyButton);
             registerBtn.style.display = 'none';
-            
         } else {
             errorDiv.textContent = data.error || 'Ошибка регистрации';
         }
-        
     } catch (error) {
         errorDiv.textContent = 'Ошибка подключения к серверу';
-        console.error(error);
     } finally {
         registerBtn.disabled = false;
         registerBtn.textContent = 'Зарегистрироваться';
@@ -1009,28 +998,20 @@ window.handleLogin = async function() {
         const response = await fetch(`${API_URL}/api/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: cleanPhone, password: password })
+            body: JSON.stringify({ phone: cleanPhone, password })
         });
         
         const data = await response.json();
         
         if (data.success) {
-            // Сохраняем пользователя в localStorage
             localStorage.setItem('currentUser', JSON.stringify(data.user));
-            
             showNotification('Успешный вход!');
-            document.getElementById('authContainer').style.display = 'none';
-            document.getElementById('cabinetContainer').style.display = 'block';
-            document.getElementById('userGreeting').textContent = `Здравствуйте, ${data.user.name}!`;
-            
-            loadUserData();
+            checkAuthAndRedirect();
         } else {
             errorDiv.textContent = data.error || 'Неверный телефон или пароль';
         }
-        
     } catch (error) {
         errorDiv.textContent = 'Ошибка подключения к серверу';
-        console.error(error);
     }
 };
 
@@ -1039,13 +1020,12 @@ window.handleLogin = async function() {
 // ======================
 window.handleLogout = function() {
     localStorage.removeItem('currentUser');
-    document.getElementById('authContainer').style.display = 'block';
-    document.getElementById('cabinetContainer').style.display = 'none';
     showNotification('Вы вышли из системы');
+    checkAuthAndRedirect();
 };
 
 // ======================
-// ЗАГРУЗКА ДАННЫХ ПОЛЬЗОВАТЕЛЯ
+// ЗАГРУЗКА ДАННЫХ
 // ======================
 function loadUserData() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -1053,65 +1033,14 @@ function loadUserData() {
     document.getElementById('profilePhone').value = currentUser.phone || '';
     
     document.getElementById('ordersGrid').innerHTML = '<div class="loading">У вас пока нет заказов</div>';
-    document.getElementById('addressesList').innerHTML = '<div class="loading">У вас пока нет сохраненных адресов</div>';
+    document.getElementById('addressesList').innerHTML = '<div class="loading">У вас пока нет адресов</div>';
 }
 
-// ======================
-// ПРОФИЛЬ И АДРЕСА (заглушки)
-// ======================
 window.saveProfile = function() { showNotification('Данные сохранены'); };
 window.changePassword = function() { showNotification('Пароль изменен'); };
 window.addAddress = function() { showNotification('Адрес добавлен'); };
 window.trackOrder = function() { showNotification('Функция отслеживания в разработке'); };
 window.repeatOrder = function(number) { 
-    if (confirm(`Повторить заказ №${number}?`)) {
-        window.location.href = `order.html?repeat=${number}`;
-    }
-};
-
-// ======================
-// ДЕЙСТВИЯ С ПРОФИЛЕМ
-// ======================
-window.saveProfile = function() {
-    showNotification('Данные сохранены');
-};
-
-window.changePassword = function() {
-    showNotification('Пароль изменен');
-};
-
-// ======================
-// ДЕЙСТВИЯ С АДРЕСАМИ
-// ======================
-window.addAddress = function() {
-    showNotification('Адрес добавлен');
-};
-
-window.setDefaultAddress = function(id) {
-    showNotification('Адрес по умолчанию изменен');
-};
-
-window.editAddress = function(id, oldAddress) {
-    showNotification('Адрес обновлен');
-};
-
-window.deleteAddress = function(id) {
-    showNotification('Адрес удален');
-};
-
-// ======================
-// ОТСЛЕЖИВАНИЕ
-// ======================
-window.trackOrder = async function(number = null) {
-    const trackNum = number || document.getElementById('trackNumber').value;
-    if (!trackNum) {
-        showNotification('Введите номер заказа');
-        return;
-    }
-    showNotification(`Заказ ${trackNum} найден (заглушка)`);
-};
-
-window.repeatOrder = function(number) {
     if (confirm(`Повторить заказ №${number}?`)) {
         window.location.href = `order.html?repeat=${number}`;
     }
@@ -1155,6 +1084,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+    
+    // Проверяем авторизацию при загрузке
+    checkAuthAndRedirect();
 });
 </script>
 </body>
