@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ-панель — TransCargo</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #00aaff;
+            color: white;
+        }
+        tr:hover {
+            background: #f9f9f9;
+        }
+        .verified {
+            color: green;
+            font-weight: bold;
+        }
+        .unverified {
+            color: orange;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+        }
+        .total {
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>👑 Админ-панель TransCargo</h1>
+    
+    <div>
+        <input type="password" id="adminKey" placeholder="Введите пароль" style="width: 200px;">
+        <button onclick="loadUsers()">Показать пользователей</button>
+    </div>
+    
+    <div id="error" class="error"></div>
+    <div id="total" class="total"></div>
+    
+    <div id="usersTable"></div>
+    
+    <script>
+        const API_URL = 'https://hidden-credit-3437.andrey-2019-myashin.workers.dev';
+        
+        async function loadUsers() {
+            const key = document.getElementById('adminKey').value;
+            const errorDiv = document.getElementById('error');
+            const totalDiv = document.getElementById('total');
+            const tableDiv = document.getElementById('usersTable');
+            
+            errorDiv.textContent = '';
+            
+            if (!key) {
+                errorDiv.textContent = 'Введите пароль';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users?key=${key}`);
+                const data = await response.json();
+                
+                if (response.status === 403) {
+                    errorDiv.textContent = data.error;
+                    return;
+                }
+                
+                if (data.users && data.users.length === 0) {
+                    totalDiv.textContent = '👥 Пока нет зарегистрированных пользователей';
+                    tableDiv.innerHTML = '';
+                    return;
+                }
+                
+                totalDiv.innerHTML = `👥 Всего пользователей: <strong>${data.total}</strong>`;
+                
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Имя</th>
+                                <th>Телефон</th>
+                                <th>Статус</th>
+                                <th>Дата регистрации</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                data.users.forEach(user => {
+                    const statusClass = user.verified ? 'verified' : 'unverified';
+                    const statusText = user.verified ? '✅ Подтвержден' : '⏳ Ожидает подтверждения';
+                    
+                    html += `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.name}</td>
+                            <td>${user.phone}</td>
+                            <td class="${statusClass}">${statusText}</td>
+                            <td>${user.registeredAt || 'неизвестно'}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</tbody></table>`;
+                tableDiv.innerHTML = html;
+                
+            } catch (error) {
+                errorDiv.textContent = 'Ошибка загрузки данных';
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
