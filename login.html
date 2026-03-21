@@ -864,6 +864,11 @@ window.switchCabinetTab = function(tabName, element) {
 };
 
 // ======================
+// API НАСТРОЙКИ
+// ======================
+const API_URL = 'https://hidden-credit-3437.andrey-2019-myashin.workers.dev';
+
+// ======================
 // РЕГИСТРАЦИЯ
 // ======================
 window.handleRegister = async function() {
@@ -904,91 +909,79 @@ window.handleRegister = async function() {
     registerBtn.textContent = 'Регистрация...';
     
     try {
-        // Проверяем, нет ли уже такого телефона
-        const existing = await pb.collection(COLLECTION).getList(1, 1, {
-            filter: `phone = "${cleanPhone}"`
+        const response = await fetch(`${API_URL}/api/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                name: name, 
+                phone: cleanPhone, 
+                password: password 
+            })
         });
         
-        if (existing.items.length > 0) {
-            errorDiv.textContent = 'Пользователь с таким номером уже существует';
-            return;
-        }
+        const data = await response.json();
         
-        // Генерируем код
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiresAt = Date.now() + 10 * 60 * 1000;
-        
-        // Создаём пользователя
-        await pb.collection(COLLECTION).create({
-            name: name,
-            phone: cleanPhone,
-            password: password,
-            code: code,
-            code_expires: expiresAt,
-            verified: false
-        });
-        
-        // ПОКАЗЫВАЕМ КОД
-        successDiv.innerHTML = `
-            <div style="text-align: center; padding: 15px;">
-                <div style="font-size: 14px; color: #666;">✅ Регистрация успешна!</div>
-                <div style="font-size: 42px; font-weight: bold; letter-spacing: 8px; color: #00aaff; 
-                    background: var(--bg); padding: 15px; border-radius: 10px; margin: 15px 0;
-                    border: 2px dashed var(--accent); font-family: monospace;">
-                    ${code}
+        if (data.success) {
+            // ПОКАЗЫВАЕМ КОД
+            successDiv.innerHTML = `
+                <div style="text-align: center; padding: 15px;">
+                    <div style="font-size: 14px; color: #666;">✅ Регистрация успешна!</div>
+                    <div style="font-size: 42px; font-weight: bold; letter-spacing: 8px; color: #00aaff; 
+                        background: var(--bg); padding: 15px; border-radius: 10px; margin: 15px 0;
+                        border: 2px dashed var(--accent); font-family: monospace;">
+                        ${data.code}
+                    </div>
+                    <div style="font-size: 13px; color: #ff4444;">⚠️ Код действителен 10 минут</div>
                 </div>
-                <div style="font-size: 13px; color: #ff4444;">⚠️ Код действителен 10 минут</div>
-            </div>
-        `;
-        
-        // Поле для ввода кода
-        const codeInput = document.createElement('input');
-        codeInput.id = 'verificationCode';
-        codeInput.type = 'text';
-        codeInput.placeholder = 'Введите код';
-        codeInput.maxLength = 6;
-        codeInput.style.marginTop = '15px';
-        codeInput.style.padding = '12px';
-        codeInput.style.fontSize = '18px';
-        codeInput.style.textAlign = 'center';
-        
-        const verifyButton = document.createElement('button');
-        verifyButton.textContent = '✅ Подтвердить';
-        verifyButton.className = 'auth-btn';
-        verifyButton.onclick = async () => {
-            const userCode = document.getElementById('verificationCode').value;
+            `;
             
-            const result = await pb.collection(COLLECTION).getList(1, 1, {
-                filter: `phone = "${cleanPhone}" && code = "${userCode}" && code_expires > ${Date.now()}`
-            });
+            // Поле для ввода кода
+            const codeInput = document.createElement('input');
+            codeInput.id = 'verificationCode';
+            codeInput.type = 'text';
+            codeInput.placeholder = 'Введите код';
+            codeInput.maxLength = 6;
+            codeInput.style.cssText = 'width:100%; padding:12px; margin-top:15px; font-size:18px; text-align:center; border-radius:6px; border:1px solid var(--border); background:var(--bg);';
             
-            if (result.items.length > 0) {
-                const user = result.items[0];
-                await pb.collection(COLLECTION).update(user.id, {
-                    verified: true,
-                    code: null,
-                    code_expires: null
+            const verifyButton = document.createElement('button');
+            verifyButton.textContent = '✅ Подтвердить';
+            verifyButton.className = 'auth-btn';
+            verifyButton.onclick = async () => {
+                const userCode = document.getElementById('verificationCode').value;
+                
+                const verifyRes = await fetch(`${API_URL}/api/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: cleanPhone, code: userCode })
                 });
                 
-                successDiv.innerHTML = `
-                    <div style="text-align: center; color: #4CAF50; padding: 20px;">
-                        <span style="font-size: 48px;">✅</span>
-                        <h3>Телефон подтвержден!</h3>
-                        <p>Теперь вы можете войти</p>
-                    </div>
-                `;
-                setTimeout(() => window.switchAuthTab('login'), 2000);
-            } else {
-                alert('Неверный код или истек срок');
-            }
-        };
-        
-        document.getElementById('registerForm').appendChild(codeInput);
-        document.getElementById('registerForm').appendChild(verifyButton);
-        registerBtn.style.display = 'none';
+                const verifyData = await verifyRes.json();
+                
+                if (verifyData.success) {
+                    successDiv.innerHTML = `
+                        <div style="text-align: center; color: #4CAF50; padding: 20px;">
+                            <span style="font-size: 48px;">✅</span>
+                            <h3>Телефон подтвержден!</h3>
+                            <p>Теперь вы можете войти</p>
+                        </div>
+                    `;
+                    setTimeout(() => window.switchAuthTab('login'), 2000);
+                } else {
+                    alert(verifyData.error || 'Неверный код или истек срок');
+                }
+            };
+            
+            document.getElementById('registerForm').appendChild(codeInput);
+            document.getElementById('registerForm').appendChild(verifyButton);
+            registerBtn.style.display = 'none';
+            
+        } else {
+            errorDiv.textContent = data.error || 'Ошибка регистрации';
+        }
         
     } catch (error) {
-        errorDiv.textContent = error.message;
+        errorDiv.textContent = 'Ошибка подключения к серверу';
+        console.error(error);
     } finally {
         registerBtn.disabled = false;
         registerBtn.textContent = 'Зарегистрироваться';
@@ -1013,29 +1006,31 @@ window.handleLogin = async function() {
     const cleanPhone = phone.replace(/\D/g,'');
     
     try {
-        const result = await pb.collection(COLLECTION).getList(1, 1, {
-            filter: `phone = "${cleanPhone}" && password = "${password}" && verified = true`
+        const response = await fetch(`${API_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: cleanPhone, password: password })
         });
         
-        if (result.items.length > 0) {
-            const user = result.items[0];
-            localStorage.setItem('currentUser', JSON.stringify({
-                id: user.id,
-                name: user.name,
-                phone: user.phone
-            }));
+        const data = await response.json();
+        
+        if (data.success) {
+            // Сохраняем пользователя в localStorage
+            localStorage.setItem('currentUser', JSON.stringify(data.user));
             
             showNotification('Успешный вход!');
             document.getElementById('authContainer').style.display = 'none';
             document.getElementById('cabinetContainer').style.display = 'block';
-            document.getElementById('userGreeting').textContent = `Здравствуйте, ${user.name}!`;
+            document.getElementById('userGreeting').textContent = `Здравствуйте, ${data.user.name}!`;
             
             loadUserData();
         } else {
-            errorDiv.textContent = 'Неверный телефон или пароль';
+            errorDiv.textContent = data.error || 'Неверный телефон или пароль';
         }
+        
     } catch (error) {
-        errorDiv.textContent = 'Ошибка подключения к базе';
+        errorDiv.textContent = 'Ошибка подключения к серверу';
+        console.error(error);
     }
 };
 
@@ -1050,7 +1045,7 @@ window.handleLogout = function() {
 };
 
 // ======================
-// ЗАГРУЗКА ДАННЫХ
+// ЗАГРУЗКА ДАННЫХ ПОЛЬЗОВАТЕЛЯ
 // ======================
 function loadUserData() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -1060,6 +1055,19 @@ function loadUserData() {
     document.getElementById('ordersGrid').innerHTML = '<div class="loading">У вас пока нет заказов</div>';
     document.getElementById('addressesList').innerHTML = '<div class="loading">У вас пока нет сохраненных адресов</div>';
 }
+
+// ======================
+// ПРОФИЛЬ И АДРЕСА (заглушки)
+// ======================
+window.saveProfile = function() { showNotification('Данные сохранены'); };
+window.changePassword = function() { showNotification('Пароль изменен'); };
+window.addAddress = function() { showNotification('Адрес добавлен'); };
+window.trackOrder = function() { showNotification('Функция отслеживания в разработке'); };
+window.repeatOrder = function(number) { 
+    if (confirm(`Повторить заказ №${number}?`)) {
+        window.location.href = `order.html?repeat=${number}`;
+    }
+};
 
 // ======================
 // ДЕЙСТВИЯ С ПРОФИЛЕМ
